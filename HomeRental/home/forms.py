@@ -90,6 +90,8 @@ class PropertyForm(forms.ModelForm):
             'contact_email',
             'property_type',
             'image',
+            'latitude', 
+            'longitude',
         ]
 
 

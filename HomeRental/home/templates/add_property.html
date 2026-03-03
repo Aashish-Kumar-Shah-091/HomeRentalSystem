@@ -73,6 +73,50 @@
     background: rgba(255, 255, 255, 0.9);
     color: #111111;
   }
+
+  .form-label-custom {
+    display: block;
+    color: #ffffff;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+  }
+
+  .map-panel {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+  }
+
+  .map-title {
+    color: #ffffff;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    text-align: center;
+  }
+
+  .map-help {
+    color: rgba(255, 255, 255, 0.85);
+    text-align: center;
+    margin-top: 0.65rem;
+    margin-bottom: 0;
+  }
+
+  .map-circle {
+    width: min(420px, 92%);
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid rgba(255, 255, 255, 0.75);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  #map {
+    width: 100%;
+    height: 100%;
+  }
 </style>
 {% endblock %}
 
@@ -83,17 +127,109 @@
       <div class="card shadow-sm property-form-card">
         <div class="card-body p-4">
           <h1 class="h3 mb-4">{% if is_edit %}Edit Property{% else %}Create Property{% endif %}</h1>
-    <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <div class="d-flex flex-wrap gap-2">
-        <button class="btn btn-primary" type="submit">{% if is_edit %}Update{% else %}Create{% endif %}</button>
-        <a class="btn btn-outline-secondary" href="{% url 'properties' %}">Cancel</a>
-      </div>
-    </form>
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row g-3">
+              <div class="col-12 col-md-7">
+                <label class="form-label-custom" for="{{ form.title.id_for_label }}">Title</label>
+                {{ form.title }}
+              </div>
+              <div class="col-12 col-md-5">
+                <label class="form-label-custom" for="{{ form.price.id_for_label }}">Price</label>
+                {{ form.price }}
+              </div>
+              <div class="col-12">
+                <label class="form-label-custom" for="{{ form.description.id_for_label }}">Description</label>
+                {{ form.description }}
+              </div>
+              <div class="col-12">
+                <label class="form-label-custom" for="{{ form.location.id_for_label }}">Location</label>
+                {{ form.location }}
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label-custom" for="{{ form.contact_name.id_for_label }}">Contact Name</label>
+                {{ form.contact_name }}
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label-custom" for="{{ form.contact_phone.id_for_label }}">Contact Phone</label>
+                {{ form.contact_phone }}
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label-custom" for="{{ form.contact_email.id_for_label }}">Contact Email</label>
+                {{ form.contact_email }}
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label-custom" for="{{ form.property_type.id_for_label }}">Property Type</label>
+                {{ form.property_type }}
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label-custom" for="{{ form.image.id_for_label }}">Property Image</label>
+                {{ form.image }}
+              </div>
+            </div>
+
+            <input type="hidden" id="latitude" name="latitude" value="{{ form.latitude.value|default_if_none:'' }}">
+            <input type="hidden" id="longitude" name="longitude" value="{{ form.longitude.value|default_if_none:'' }}">
+
+            <div class="map-panel">
+              <p class="map-title">Pick Location On Map</p>
+              <div class="map-circle">
+                <div id="map"></div>
+              </div>
+              <p class="map-help">Click anywhere on the map to set latitude and longitude.</p>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-primary" type="submit">{% if is_edit %}Update{% else %}Create{% endif %}</button>
+              <a class="btn btn-outline-secondary" href="{% url 'properties' %}">Cancel</a>
+            </div>
+          </form>
         </div>
       </div>
     </div>
   </div>
 </section>
 {% endblock %}
+
+{% block extra_scripts %}
+<script>
+    var latInput = document.getElementById('latitude');
+    var lngInput = document.getElementById('longitude');
+
+    var defaultLat = parseFloat(latInput.value) || 26.6735;
+    var defaultLng = parseFloat(lngInput.value) || 87.2773;
+    var map = L.map('map').setView([defaultLat, defaultLng], 13); // Default location
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '(c) OpenStreetMap contributors'
+    }).addTo(map);
+
+    var marker;
+    if (latInput.value && lngInput.value) {
+        marker = L.marker([defaultLat, defaultLng]).addTo(map);
+    }
+
+    setTimeout(function () {
+        map.invalidateSize();
+    }, 0);
+
+    map.on('click', function(e) {
+        var lat = e.latlng.lat;
+        var lng = e.latlng.lng;
+
+        // Remove old marker
+        if (marker) {
+            map.removeLayer(marker);
+        }
+
+        // Add new marker
+        marker = L.marker([lat, lng]).addTo(map);
+
+        // Set hidden input values
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+    });
+</script>
+{% endblock %}
+

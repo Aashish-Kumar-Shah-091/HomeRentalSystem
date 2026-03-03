@@ -14,6 +14,27 @@
         object-fit: cover;
     }
 
+    .property-map-wrap {
+        margin-top: 1rem;
+    }
+
+    .property-map-controls {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+
+    .property-map {
+        width: min(360px, 100%);
+        aspect-ratio: 1 / 1;
+        margin: 0 auto;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid #d8d8d8;
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+    }
+
     {% if is_compact_view %}
     .property-detail-wrap {
         max-width: 560px;
@@ -46,6 +67,19 @@
             </div>
             {% endif %}
             <p class="mb-4">{{ property.description }}</p>
+
+            <div class="property-map-wrap">
+                <p class="mb-2"><strong>Map Location:</strong></p>
+                {% if property.latitude and property.longitude %}
+                <div id="property-map" class="property-map"></div>
+                <div class="property-map-controls">
+                    <button type="button" id="zoom-in-btn" class="btn btn-outline-primary btn-sm" aria-label="Zoom in">+</button>
+                    <button type="button" id="zoom-out-btn" class="btn btn-outline-secondary btn-sm" aria-label="Zoom out">-</button>
+                </div>
+                {% else %}
+                <p class="text-muted mb-3">Owner has not set map coordinates for this property yet.</p>
+                {% endif %}
+            </div>
 
             <div class="d-flex flex-wrap gap-2">
                 {% if request.user.is_authenticated and request.user != property.user %}
@@ -82,4 +116,34 @@
     </article>
     {% endif %}
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if property.latitude and property.longitude %}
+<script>
+    var lat = {{ property.latitude }};
+    var lng = {{ property.longitude }};
+
+    var propertyMap = L.map('property-map', {
+        scrollWheelZoom: false
+    }).setView([lat, lng], 14);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '(c) OpenStreetMap contributors'
+    }).addTo(propertyMap);
+
+    L.marker([lat, lng]).addTo(propertyMap);
+
+    document.getElementById('zoom-in-btn').addEventListener('click', function () {
+        propertyMap.zoomIn();
+    });
+    document.getElementById('zoom-out-btn').addEventListener('click', function () {
+        propertyMap.zoomOut();
+    });
+
+    setTimeout(function () {
+        propertyMap.invalidateSize();
+    }, 0);
+</script>
+{% endif %}
 {% endblock %}
