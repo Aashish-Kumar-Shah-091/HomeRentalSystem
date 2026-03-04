@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='home_list'),
+    path('about/', views.about, name='about'),
     path('home/', views.index, name='home'),
     path('homes/', views.home_list, name='homes'),
     path('create/', views.home_create, name='home_create'),
@@ -22,5 +23,5 @@ urlpatterns = [
     path('notifications/read-all/', views.mark_all_notifications_read, name='mark_all_notifications_read'),
     path('tenants/<int:user_id>/', views.tenant_profile, name='tenant_profile'),
     path('profile/', views.profile, name='profile'),
-
 ] 
+

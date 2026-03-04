@@ -1,0 +1,256 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="about-page py-5">
+    <div class="container">
+        <div class="about-hero text-center mb-5">
+            <h1 class="fw-bold mb-2">About Ghar Setu</h1>
+            <p class="text-muted mb-0">A clear and trusted platform for renting homes.</p>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-6">
+                <article class="about-card h-100">
+                    <h2 class="h4 mb-3">Our Mission</h2>
+                    <p class="mb-0">To make house renting simple, transparent, and secure for both tenants and landlords.</p>
+                </article>
+            </div>
+            <div class="col-md-6">
+                <article class="about-card h-100">
+                    <h2 class="h4 mb-3">Our Vision</h2>
+                    <p class="mb-0">To be the most trusted rental platform where people can find and manage homes without confusion.</p>
+                </article>
+            </div>
+        </div>
+
+        <section class="mb-5">
+            <h2 class="h3 fw-semibold mb-4">Our Impact</h2>
+            <div class="row g-3">
+                {% for stat in stats %}
+                <div class="col-6 col-lg-3">
+                    <div class="about-stat h-100">
+                        <div class="about-stat-number">{{ stat.number }}</div>
+                        <p class="about-stat-label mb-0">{{ stat.label }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="h3 fw-semibold mb-4">Why Choose Us</h2>
+            <div class="row g-3">
+                {% for feature in features %}
+                <div class="col-md-6 col-lg-4">
+                    <article class="about-card h-100">
+                        <h3 class="h5 mb-2"><i class="fas {{ feature.icon }} me-2 text-primary"></i>{{ feature.title }}</h3>
+                        <p class="mb-0 text-muted">{{ feature.description }}</p>
+                    </article>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="h3 fw-semibold mb-4">Our Team</h2>
+            <div class="row g-3">
+                {% for member in team_members %}
+                <div class="col-md-6 col-lg-3">
+                    <article class="about-card h-100 text-center">
+                        <div class="team-icon mb-3">
+                            <i class="fas {{ member.icon }}"></i>
+                        </div>
+                        <h3 class="h5 mb-1">{{ member.name }}</h3>
+                        <p class="text-primary mb-2">{{ member.role }}</p>
+                        <p class="text-muted mb-0">{{ member.bio }}</p>
+                    </article>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="h3 fw-semibold mb-4">Frequently Asked Questions</h2>
+            <div class="accordion" id="aboutFaq">
+                {% for faq in faqs %}
+                <div class="accordion-item">
+                    <h3 class="accordion-header">
+                        <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ forloop.counter }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="faq{{ forloop.counter }}">
+                            {{ faq.question }}
+                        </button>
+                    </h3>
+                    <div id="faq{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#aboutFaq">
+                        <div class="accordion-body">
+                            {{ faq.answer }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="about-cta text-center">
+            <h2 class="h3 fw-bold mb-2">Ready to Find Your Home?</h2>
+            <p class="mb-4">Browse verified properties or list your own rental now.</p>
+            <a href="{% url 'properties' %}" class="btn btn-light me-2 mb-2">Browse Properties</a>
+            {% if not user.is_authenticated %}
+            <a href="{% url 'register' %}" class="btn btn-outline-light mb-2">Get Started</a>
+            {% else %}
+            <a href="{% url 'property' %}" class="btn btn-outline-light mb-2">List Your Property</a>
+            {% endif %}
+        </section>
+    </div>
+</section>
+
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(18px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes popIn {
+        from {
+            opacity: 0;
+            transform: scale(0.92);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .about-page {
+        background: #f4f6fb;
+    }
+
+    .about-hero,
+    .about-page section {
+        animation: fadeInUp 0.6s ease both;
+    }
+
+    .about-page section:nth-of-type(2) {
+        animation-delay: 0.08s;
+    }
+
+    .about-page section:nth-of-type(3) {
+        animation-delay: 0.16s;
+    }
+
+    .about-page section:nth-of-type(4) {
+        animation-delay: 0.24s;
+    }
+
+    .about-page section:nth-of-type(5) {
+        animation-delay: 0.32s;
+    }
+
+    .about-page section:nth-of-type(6) {
+        animation-delay: 0.4s;
+    }
+
+    .about-card {
+        background: #fff;
+        border: 1px solid #e6e8ef;
+        border-radius: 12px;
+        padding: 1.25rem;
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+
+    .about-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(35, 61, 123, 0.09);
+        border-color: #d4dced;
+    }
+
+    .about-stat {
+        background: #fff;
+        border: 1px solid #e6e8ef;
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        animation: popIn 0.45s ease both;
+    }
+
+    .about-stat:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 18px rgba(35, 61, 123, 0.08);
+    }
+
+    .row .col-6:nth-child(1) .about-stat {
+        animation-delay: 0.06s;
+    }
+
+    .row .col-6:nth-child(2) .about-stat {
+        animation-delay: 0.12s;
+    }
+
+    .row .col-6:nth-child(3) .about-stat {
+        animation-delay: 0.18s;
+    }
+
+    .row .col-6:nth-child(4) .about-stat {
+        animation-delay: 0.24s;
+    }
+
+    .about-stat-number {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #233d7b;
+    }
+
+    .about-stat-label {
+        color: #5d6475;
+    }
+
+    .team-icon {
+        width: 56px;
+        height: 56px;
+        margin: 0 auto;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #e9eefb;
+        color: #233d7b;
+        font-size: 1.25rem;
+        transition: transform 0.25s ease, background-color 0.25s ease;
+    }
+
+    .about-card:hover .team-icon {
+        transform: scale(1.08) rotate(3deg);
+        background: #dfe8ff;
+    }
+
+    .accordion-item {
+        transition: box-shadow 0.2s ease;
+    }
+
+    .accordion-item:hover {
+        box-shadow: 0 6px 14px rgba(35, 61, 123, 0.07);
+    }
+
+    .about-cta {
+        background: linear-gradient(135deg, #233d7b 0%, #3f62b5 100%);
+        color: #fff;
+        border-radius: 12px;
+        padding: 2rem 1.25rem;
+    }
+
+    .about-cta .btn {
+        min-width: 170px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .about-cta .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.18);
+    }
+</style>
+{% endblock %}

@@ -23,6 +23,110 @@ from django.http import HttpResponseForbidden
 
 User = get_user_model()
 
+def about(request):
+    """Display the about page with company info, stats, team, and FAQs"""
+    stats = [
+        {'number': '5,000+', 'label': 'Properties Listed'},
+        {'number': '10,000+', 'label': 'Happy Tenants'},
+        {'number': '2,500+', 'label': 'Active Landlords'},
+        {'number': '15,000+', 'label': 'Successful Bookings'},
+    ]
+    
+    team_members = [
+        {
+            'name': 'Rajesh Kumar',
+            'role': 'Founder & CEO',
+            'bio': 'Visionary leader with 15+ years in real estate technology',
+            'icon': 'fa-user-tie'
+        },
+        {
+            'name': 'Priya Sharma',
+            'role': 'CTO',
+            'bio': 'Tech expert specializing in scalable web platforms',
+            'icon': 'fa-computer'
+        },
+        {
+            'name': 'Amit Patel',
+            'role': 'Head of Operations',
+            'bio': 'Operations specialist ensuring smooth user experiences',
+            'icon': 'fa-cogs'
+        },
+        {
+            'name': 'Neha Singh',
+            'role': 'Customer Success Manager',
+            'bio': 'Dedicated to providing exceptional customer service',
+            'icon': 'fa-headset'
+        },
+    ]
+    
+    faqs = [
+        {
+            'question': 'How do I list my property?',
+            'answer': 'Simply sign up, create an account, and click "List Your Property". Fill in the details, upload photos, and publish your listing. Your property will be visible to thousands of tenants.'
+        },
+        {
+            'question': 'Is it safe to book a property?',
+            'answer': 'Yes! All properties are verified by our team. We also provide secure payment processing and 24/7 customer support to ensure safe transactions.'
+        },
+        {
+            'question': 'What are the fees involved?',
+            'answer': 'We charge a small listing fee for property owners and a booking fee for tenants. There are no hidden charges - all fees are clearly mentioned upfront.'
+        },
+        {
+            'question': 'How do I contact the landlord?',
+            'answer': 'Once you book a property, you can message the landlord directly through our platform. They typically respond within a few hours.'
+        },
+        {
+            'question': 'Can I cancel a booking?',
+            'answer': 'Yes, you can cancel within 24 hours of booking for a full refund. After that, cancellation policies vary by property.'
+        },
+        {
+            'question': 'How are disputes resolved?',
+            'answer': 'Our support team mediates disputes between landlords and tenants. We aim to resolve all issues fairly and quickly.'
+        },
+    ]
+    
+    features = [
+        {
+            'title': 'Easy Property Listing',
+            'description': 'List your property in minutes with our simple interface',
+            'icon': 'fa-home'
+        },
+        {
+            'title': 'Verified Listings',
+            'description': 'All properties are verified for authenticity and safety',
+            'icon': 'fa-check-circle'
+        },
+        {
+            'title': 'Secure Payments',
+            'description': 'Safe and encrypted payment processing',
+            'icon': 'fa-credit-card'
+        },
+        {
+            'title': '24/7 Support',
+            'description': 'Round-the-clock customer support for all your needs',
+            'icon': 'fa-life-ring'
+        },
+        {
+            'title': 'Direct Messaging',
+            'description': 'Communicate directly with landlords and tenants',
+            'icon': 'fa-envelope'
+        },
+        {
+            'title': 'Mobile Friendly',
+            'description': 'Access your account anytime, anywhere',
+            'icon': 'fa-mobile-alt'
+        },
+    ]
+    
+    return render(request, 'about.html', {
+        'stats': stats,
+        'team_members': team_members,
+        'faqs': faqs,
+        'features': features,
+    })
+
+
 def index(request):
     if request.method == "POST":
         if not request.user.is_authenticated:
