@@ -4,144 +4,221 @@
 {% if form.instance.pk %}Edit Property{% else %}Create Property{% endif %}
 {% endblock %}
 
-{% block content %}
-
-<section class="container py-5">
-
-<div class="row justify-content-center">
-
-<div class="col-lg-8">
-
-<div class="card shadow-sm border-0">
-
-<!-- HEADER -->
-
-<div class="card-header bg-success text-white py-3">
-
-<h1 class="h4 mb-0">
-
-{% if form.instance.pk %}
-<i class="fas fa-edit me-2"></i> Edit Property
-{% else %}
-<i class="fas fa-home me-2"></i> Create Property
-{% endif %}
-
-</h1>
-
-</div>
-
-
-<!-- BODY -->
-
-<div class="card-body p-4">
-
-<form method="post" enctype="multipart/form-data" novalidate>
-
-{% csrf_token %}
-
-
-<!-- NON FIELD ERRORS -->
-
-{% if form.non_field_errors %}
-
-<div class="alert alert-danger">
-
-{% for error in form.non_field_errors %}
-<div>{{ error }}</div>
-{% endfor %}
-
-</div>
-
-{% endif %}
-
-
-
-<!-- FORM FIELDS -->
-
-{% for field in form %}
-
-<div class="mb-3">
-
-<label class="form-label fw-semibold" for="{{ field.id_for_label }}">
-{{ field.label }}
-</label>
-
-{{ field }}
-
-{% if field.help_text %}
-
-<div class="form-text">
-{{ field.help_text|safe }}
-</div>
-
-{% endif %}
-
-{% if field.errors %}
-
-<div class="text-danger small mt-1">
-
-{% for error in field.errors %}
-<div>{{ error }}</div>
-{% endfor %}
-
-</div>
-
-{% endif %}
-
-</div>
-
-{% endfor %}
-
-
-
-<!-- BUTTONS -->
-
-<div class="d-flex flex-column flex-sm-row gap-2 mt-4">
-
-<button type="submit" class="btn btn-success">
-
-{% if form.instance.pk %}
-<i class="fas fa-save me-2"></i> Update Property
-{% else %}
-<i class="fas fa-plus me-2"></i> Create Property
-{% endif %}
-
-</button>
-
-<a href="{% url 'properties' %}" class="btn btn-outline-secondary">
-
-<i class="fas fa-times me-2"></i> Cancel
-
-</a>
-
-</div>
-
-</form>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-
-
+{% block extra_head %}
 <style>
+  .property-form-bg {
+    background-image:
+      linear-gradient(rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.18)),
+      url("https://i.pinimg.com/736x/da/09/66/da0966c629589e99965675c85c564fe8.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
 
-/* small hover effect for card */
+  .property-form-card {
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+  }
 
-.card {
-transition: transform .2s ease, box-shadow .2s ease;
-}
+  .property-form-card .card-body {
+    color: #ffffff;
+  }
 
-.card:hover {
-transform: translateY(-2px);
-box-shadow: 0 10px 20px rgba(0,0,0,.08);
-}
+  .property-form-card h1 {
+    color: #ffffff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  }
 
+  .property-form-card input:not([type="file"]),
+  .property-form-card select,
+  .property-form-card textarea {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    color: #ffffff;
+  }
+
+  .property-form-card select {
+    background: rgba(255, 255, 255, 0.8);
+    color: #111111;
+  }
+
+  .property-form-card select option {
+    background: #ffffff;
+    color: #111111;
+  }
+
+  .property-form-card input:not([type="file"])::placeholder,
+  .property-form-card textarea::placeholder {
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  .property-form-card input:focus,
+  .property-form-card select:focus,
+  .property-form-card textarea:focus {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.8);
+    color: #ffffff;
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.18);
+  }
+
+  .property-form-card select:focus {
+    background: rgba(255, 255, 255, 0.9);
+    color: #111111;
+  }
+
+  .form-label-custom {
+    display: block;
+    color: #ffffff;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+  }
+
+  .map-panel {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+  }
+
+  .map-title {
+    color: #ffffff;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    text-align: center;
+  }
+
+  .map-help {
+    color: rgba(255, 255, 255, 0.85);
+    text-align: center;
+    margin-top: 0.65rem;
+    margin-bottom: 0;
+  }
+
+  .map-circle {
+    width: min(420px, 92%);
+    aspect-ratio: 1 / 1;
+    margin: 0 auto;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid rgba(255, 255, 255, 0.75);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  }
+
+  #map {
+    width: 100%;
+    height: 100%;
+  }
 </style>
+{% endblock %}
 
+{% block content %}
+<section class="container py-4 py-lg-5 property-form-bg rounded-3">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm property-form-card">
+        <div class="card-body p-4">
+          <h1 class="h3 mb-4">{% if form.instance.pk %}Edit Property{% else %}Create Property{% endif %}</h1>
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row g-3">
+              <div class="col-12 col-md-7">
+                <label class="form-label-custom" for="{{ form.title.id_for_label }}">Title</label>
+                {{ form.title }}
+              </div>
+              <div class="col-12 col-md-5">
+                <label class="form-label-custom" for="{{ form.price.id_for_label }}">Price</label>
+                {{ form.price }}
+              </div>
+              <div class="col-12">
+                <label class="form-label-custom" for="{{ form.description.id_for_label }}">Description</label>
+                {{ form.description }}
+              </div>
+              <div class="col-12">
+                <label class="form-label-custom" for="{{ form.location.id_for_label }}">Location</label>
+                {{ form.location }}
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label-custom" for="{{ form.contact_name.id_for_label }}">Contact Name</label>
+                {{ form.contact_name }}
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label-custom" for="{{ form.contact_phone.id_for_label }}">Contact Phone</label>
+                {{ form.contact_phone }}
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label-custom" for="{{ form.contact_email.id_for_label }}">Contact Email</label>
+                {{ form.contact_email }}
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label-custom" for="{{ form.property_type.id_for_label }}">Property Type</label>
+                {{ form.property_type }}
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label-custom" for="{{ form.image.id_for_label }}">Property Image</label>
+                {{ form.image }}
+              </div>
+            </div>
+
+            <input type="hidden" id="latitude" name="latitude" value="{{ form.latitude.value|default_if_none:'' }}">
+            <input type="hidden" id="longitude" name="longitude" value="{{ form.longitude.value|default_if_none:'' }}">
+
+            <div class="map-panel">
+              <p class="map-title">Pick Location On Map</p>
+              <div class="map-circle">
+                <div id="map"></div>
+              </div>
+              <p class="map-help">Click anywhere on the map to set latitude and longitude.</p>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <button class="btn btn-primary" type="submit">{% if form.instance.pk %}Update{% else %}Create{% endif %}</button>
+              <a class="btn btn-outline-secondary" href="{% url 'properties' %}">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    var latInput = document.getElementById('latitude');
+    var lngInput = document.getElementById('longitude');
+
+    var defaultLat = parseFloat(latInput.value) || 26.6735;
+    var defaultLng = parseFloat(lngInput.value) || 87.2773;
+    var map = L.map('map').setView([defaultLat, defaultLng], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '(c) OpenStreetMap contributors'
+    }).addTo(map);
+
+    var marker;
+    if (latInput.value && lngInput.value) {
+        marker = L.marker([defaultLat, defaultLng]).addTo(map);
+    }
+
+    setTimeout(function () {
+        map.invalidateSize();
+    }, 0);
+
+    map.on('click', function(e) {
+        var lat = e.latlng.lat;
+        var lng = e.latlng.lng;
+
+        if (marker) {
+            map.removeLayer(marker);
+        }
+
+        marker = L.marker([lat, lng]).addTo(map);
+        latInput.value = lat;
+        lngInput.value = lng;
+    });
+</script>
 {% endblock %}

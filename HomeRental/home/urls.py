@@ -15,6 +15,8 @@ urlpatterns = [
     path('properties/<int:property_id>/', views.property_detail, name='property_detail'),
     path('properties/<int:property_id>/edit/', views.property_edit, name='property_edit'),
     path('properties/<int:property_id>/delete/', views.property_delete, name='property_delete'),
+    path('properties/<int:property_id>/favorite-toggle/', views.toggle_favorite, name='toggle_favorite'),
+    path('favorites/', views.favorite_list, name='favorite_list'),
     path('book/<int:property_id>/', views.book_property, name='book_property'),
     path('bookings/<int:booking_id>/cancel/', views.cancel_booking, name='cancel_booking'),
     path('bookings/<int:booking_id>/accept/', views.accept_booking, name='accept_booking'),
@@ -24,4 +26,3 @@ urlpatterns = [
     path('tenants/<int:user_id>/', views.tenant_profile, name='tenant_profile'),
     path('profile/', views.profile, name='profile'),
 ] 
-

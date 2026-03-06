@@ -138,6 +138,14 @@
                                 Book Now
                             </button>
                         </form>
+                        <form method="post"
+                              action="{% url 'toggle_favorite' property.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn {% if is_favorited %}btn-warning{% else %}btn-outline-warning{% endif %}">
+                                <i class="fas fa-heart me-2"></i>
+                                {% if is_favorited %}Saved{% else %}Save{% endif %}
+                            </button>
+                        </form>
 
                         {% elif not request.user.is_authenticated %}
 
@@ -145,6 +153,11 @@
                            class="btn btn-primary">
                             <i class="fas fa-sign-in-alt me-2"></i>
                             Login to Book
+                        </a>
+                        <a href="{% url 'login' %}?next={% url 'property_detail' property.id %}"
+                           class="btn btn-outline-warning">
+                            <i class="fas fa-heart me-2"></i>
+                            Save
                         </a>
 
                         {% endif %}

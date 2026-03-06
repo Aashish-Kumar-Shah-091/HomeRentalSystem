@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404, redirect
 from .models import (
     home,
     Property,
+    Favorite,
     Booking,
     Profile,
     BookingCancellationNotification,
@@ -20,6 +21,8 @@ from .forms import (
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, get_user_model
 from django.http import HttpResponseForbidden
+import re
+from urllib.parse import quote
 
 User = get_user_model()
 
@@ -246,7 +249,13 @@ def property_list(request):
         "locations": locations,
         "selected_location": selected_location,
         "sort_option": sort_option,
+        "favorite_property_ids": set(),
     }
+
+    if request.user.is_authenticated:
+        context["favorite_property_ids"] = set(
+            Favorite.objects.filter(user=request.user).values_list("property_id", flat=True)
+        )
 
     return render(request, "property_list.html", context)
 
@@ -276,6 +285,10 @@ def property_detail(request, property_id):
         'property': property_obj,
         'is_compact_view': is_compact_view,
         'booked_tenants': booked_tenants,
+        'is_favorited': (
+            request.user.is_authenticated
+            and Favorite.objects.filter(user=request.user, property=property_obj).exists()
+        ),
     })
 
 
@@ -304,6 +317,32 @@ def property_delete(request, property_id):
 
 
 @login_required
+def toggle_favorite(request, property_id):
+    if request.method != "POST":
+        return redirect(request.META.get("HTTP_REFERER", "properties"))
+
+    property_obj = get_object_or_404(Property, pk=property_id)
+    favorite = Favorite.objects.filter(user=request.user, property=property_obj).first()
+
+    if favorite:
+        favorite.delete()
+    else:
+        Favorite.objects.create(user=request.user, property=property_obj)
+
+    return redirect(request.META.get("HTTP_REFERER", "properties"))
+
+
+@login_required
+def favorite_list(request):
+    favorites = (
+        Favorite.objects.filter(user=request.user)
+        .select_related("property")
+        .order_by("-created_at")
+    )
+    return render(request, "favorite_list.html", {"favorites": favorites})
+
+
+@login_required
 def book_property(request, property_id):
     property = get_object_or_404(Property, id=property_id)
 
@@ -325,7 +364,7 @@ def notifications(request):
         "owner", "property"
     )
     tenant_acceptance_qs = request.user.acceptance_notifications.select_related(
-        "owner", "property"
+        "owner", "owner__profile", "property"
     )
 
     if request.method == "GET":
@@ -361,6 +400,18 @@ def notifications(request):
         )
 
     for item in tenant_acceptance_qs:
+        owner_phone = ""
+        if hasattr(item.owner, "profile") and item.owner.profile.phone_number:
+            # wa.me expects digits with country code and no symbols.
+            owner_phone = re.sub(r"\D", "", item.owner.profile.phone_number)
+
+        whatsapp_url = ""
+        if owner_phone:
+            msg = quote(
+                f"Hello, I have booked your property {item.property.title}."
+            )
+            whatsapp_url = f"https://wa.me/{owner_phone}?text={msg}"
+
         notifications.append(
             {
                 "message": f"{item.owner.username} accepted your booking for {item.property.title}",
@@ -370,6 +421,7 @@ def notifications(request):
                 "can_accept": False,
                 "is_accepted": False,
                 "booking_id": None,
+                "whatsapp_url": whatsapp_url,
             }
         )
 
