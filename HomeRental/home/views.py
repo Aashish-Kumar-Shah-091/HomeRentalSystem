@@ -24,6 +24,7 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.http import HttpResponseForbidden
+from django.utils import timezone
 import re
 from urllib.parse import quote
 
@@ -434,11 +435,16 @@ def book_property(request, property_id):
     property = get_object_or_404(Property, id=property_id)
 
     if request.method == "POST" and request.user != property.user:
-        Booking.objects.get_or_create(
+        booking, created = Booking.objects.get_or_create(
             property=property,
             booked_by=request.user,
             owner=property.user,
         )
+        if not created:
+            booking.is_read = False
+            booking.is_accepted = False
+            booking.booked_at = timezone.now()
+            booking.save(update_fields=["is_read", "is_accepted", "booked_at"])
 
     return redirect('properties')
 
