@@ -1,16 +1,28 @@
 {% extends "layout.html" %}
 
+<!-- Template: Notifications Page
+     Purpose: Display all booking-related notifications for the user
+     Features: Show booking requests, cancellations, acceptances; accept/reject/cancel bookings; mark as read
+     For: Property owners to manage bookings, tenants to track booking status
+-->
+
 {% block title %}Notifications{% endblock %}
 
 {% block content %}
 <section class="container py-5">
+    
+    <!-- Header section with title and mark all button -->
     <div class="mb-5">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+            
+            <!-- Page title with bell icon -->
             <h1 class="h3 mb-0">
                 <i class="fas fa-bell me-2"></i>Booking Notifications
             </h1>
+            
+            <!-- Mark all notifications as read button (only if notifications exist) -->
             {% if notifications %}
-            <form method="post" action="{% url 'mark_all_notifications_read' %}" class="m-0">
+            <form method="post" action="{% url 'mark_all_notifications_read' }}" class="m-0">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-outline-primary fw-semibold">
                     <i class="fas fa-check-double me-2"></i>Mark all as read
@@ -20,21 +32,32 @@
         </div>
     </div>
 
+    <!-- Loop through each notification -->
     {% for notification in notifications %}
     <div class="card shadow-sm mb-3 border-left-{{ notification.is_read|yesno:'secondary,primary' }} border-left-4">
         <div class="card-body">
+            
+            <!-- Notification header: message and status badges -->
             <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-3">
                 <div class="flex-grow-1">
+                    
+                    <!-- Notification message text -->
                     <p class="mb-2 fs-5">
                         <i class="fas fa-info-circle me-2 text-{{ notification.is_read|yesno:'secondary,primary' }}"></i>
                         {{ notification.message }}
                     </p>
+                    
+                    <!-- Notification timestamp -->
                     <small class="text-muted">
                         <i class="fas fa-clock me-1"></i>
                         {{ notification.created_at|date:"M d, Y H:i" }}
                     </small>
                 </div>
+                
+                <!-- Status badges (Read/Unread, Accepted) -->
                 <div class="d-flex align-items-center gap-2 flex-wrap">
+                    
+                    <!-- Read status badge -->
                     {% if notification.is_read %}
                     <span class="badge bg-secondary">
                         <i class="fas fa-check me-1"></i>Read
@@ -44,6 +67,8 @@
                         <i class="fas fa-envelope me-1"></i>Unread
                     </span>
                     {% endif %}
+                    
+                    <!-- Acceptance status badge -->
                     {% if notification.is_accepted %}
                     <span class="badge bg-success">
                         <i class="fas fa-thumbs-up me-1"></i>Accepted
@@ -52,32 +77,44 @@
                 </div>
             </div>
 
+            <!-- Action buttons section: varies based on notification type -->
+            
+            <!-- For pending booking requests: Accept/Reject buttons -->
             {% if notification.can_accept and notification.booking_id %}
             <div class="d-flex gap-2 flex-wrap mt-3">
-                <form method="post" action="{% url 'accept_booking' notification.booking_id %}" class="m-0">
+                <!-- Accept booking button -->
+                <form method="post" action="{% url 'accept_booking' notification.booking_id }}" class="m-0">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-success fw-semibold">
                         <i class="fas fa-check me-1"></i>Accept Booking
                     </button>
                 </form>
-                <form method="post" action="{% url 'cancel_booking' notification.booking_id %}" class="m-0">
+                
+                <!-- Reject booking button -->
+                <form method="post" action="{% url 'cancel_booking' notification.booking_id }}" class="m-0">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-danger fw-semibold">
                         <i class="fas fa-times me-1"></i>Reject Booking
                     </button>
                 </form>
             </div>
+            
+            <!-- For confirmed bookings: Cancel button -->
             {% elif notification.can_cancel and notification.booking_id %}
             <div class="d-flex gap-2 flex-wrap mt-3">
-                <form method="post" action="{% url 'cancel_booking' notification.booking_id %}" class="m-0">
+                <!-- Cancel booking button (for owners) -->
+                <form method="post" action="{% url 'cancel_booking' notification.booking_id }}" class="m-0">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-danger fw-semibold">
                         <i class="fas fa-ban me-1"></i>Cancel Booking
                     </button>
                 </form>
             </div>
+            
+            <!-- For accepted bookings: WhatsApp contact button -->
             {% elif notification.whatsapp_url %}
             <div class="d-flex gap-2 flex-wrap mt-3">
+                <!-- Open WhatsApp chat with property owner -->
                 <a href="{{ notification.whatsapp_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-success fw-semibold">
                     <i class="fab fa-whatsapp me-1"></i>Chat on WhatsApp
                 </a>
@@ -85,6 +122,8 @@
             {% endif %}
         </div>
     </div>
+    
+    <!-- Empty state when no notifications exist -->
     {% empty %}
     <div class="alert alert-info border-0 alert-dismissible fade show" role="alert">
         <i class="fas fa-inbox me-2" style="font-size: 1.2rem;"></i>
@@ -95,6 +134,7 @@
 </section>
 
 <style>
+  /* Left border styling for notification cards */
   .border-left-4 {
     border-left: 4px solid !important;
   }

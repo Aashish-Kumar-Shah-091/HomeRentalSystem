@@ -1,10 +1,18 @@
 {% extends "layout.html" %}
 
+<!-- Template: Reviews & Ratings Page
+     Purpose: Display user testimonials and allow authenticated users to submit reviews
+     Features: Review submission form (for logged-in users), star ratings, review grid display
+     For: Users to read and submit platform feedback, ratings, and experiences
+     Reviews Show: User role (tenant/owner), rating (1-5 stars), review message, username
+-->
+
 {% block title %}
 Ratings & Reviews | Ghar Setu
 {% endblock %}
 
 {% block extra_head %}
+<!-- Page-specific styling for review form and review cards -->
 <style>
   .reviews-page {
     max-width: 1200px;
@@ -78,68 +86,107 @@ Ratings & Reviews | Ghar Setu
 {% endblock %}
 
 {% block content %}
+<!-- Main reviews page content: Submit review form and display testimonials -->
 <section class="container reviews-page py-4 py-lg-5">
+  
+  <!-- PAGE HEADER: Title and description -->
   <div class="text-center mb-4 mb-lg-5">
+    <!-- Page title -->
     <h1 class="reviews-title mb-2">Ratings & Reviews</h1>
+    <!-- Page description -->
     <p class="reviews-subtitle mb-0">What renters and owners say about using our platform.</p>
   </div>
 
+  <!-- REVIEW SUBMISSION FORM SECTION -->
   <div class="review-form-wrap mb-4 mb-lg-5">
     {% if request.user.is_authenticated %}
+      <!-- Form title for authenticated users -->
       <h2 class="h3 mb-4">Add Your Review</h2>
+      
+      <!-- Review submission form -->
       <form method="post" action="{% url 'reviews' %}">
         {% csrf_token %}
+        
+        <!-- Form fields container with 3-column responsive layout -->
         <div class="row g-3">
+          
+          <!-- User role field: Is the reviewer a tenant or owner? -->
           <div class="col-12 col-md-6">
             <label class="review-form-label" for="{{ testimonial_form.role.id_for_label }}">I am a</label>
             {{ testimonial_form.role }}
+            <!-- Display role field errors if any -->
             {% if testimonial_form.role.errors %}
               <div class="text-danger small mt-1">{{ testimonial_form.role.errors|join:", " }}</div>
             {% endif %}
           </div>
+          
+          <!-- Rating field: 1-5 star rating -->
           <div class="col-12 col-md-6">
             <label class="review-form-label" for="{{ testimonial_form.rating.id_for_label }}">Rating (1-5)</label>
             {{ testimonial_form.rating }}
+            <!-- Display rating field errors if any -->
             {% if testimonial_form.rating.errors %}
               <div class="text-danger small mt-1">{{ testimonial_form.rating.errors|join:", " }}</div>
             {% endif %}
           </div>
+          
+          <!-- Review message field: Full width text area for review content -->
           <div class="col-12">
             <label class="review-form-label" for="{{ testimonial_form.message.id_for_label }}">Your experience</label>
             {{ testimonial_form.message }}
+            <!-- Display message field errors if any -->
             {% if testimonial_form.message.errors %}
               <div class="text-danger small mt-1">{{ testimonial_form.message.errors|join:", " }}</div>
             {% endif %}
           </div>
+          
+          <!-- Submit button -->
           <div class="col-12">
             <button type="submit" class="btn btn-primary">Submit Review</button>
           </div>
         </div>
       </form>
     {% else %}
+      <!-- For unauthenticated users: Prompt to login before submitting review -->
       <p class="mb-0">
         <a href="{% url 'login' %}">Login</a> to rate us and share your experience.
       </p>
     {% endif %}
   </div>
 
+  <!-- REVIEWS DISPLAY GRID: Show all user testimonials -->
   <div class="row g-3 g-lg-4">
     {% for testimonial in testimonials %}
+      <!-- Individual review card -->
       <div class="col-12 col-md-6 col-lg-4">
         <article class="review-card">
+          
+          <!-- Star rating display: Shows 1-5 filled/empty stars based on rating -->
           <div class="review-stars" aria-label="{{ testimonial.rating }} out of 5 stars">
+            <!-- Star 1 -->
             <i class="{% if testimonial.rating >= 1 %}fa-solid{% else %}fa-regular{% endif %} fa-star"></i>
+            <!-- Star 2 -->
             <i class="{% if testimonial.rating >= 2 %}fa-solid{% else %}fa-regular{% endif %} fa-star"></i>
+            <!-- Star 3 -->
             <i class="{% if testimonial.rating >= 3 %}fa-solid{% else %}fa-regular{% endif %} fa-star"></i>
+            <!-- Star 4 -->
             <i class="{% if testimonial.rating >= 4 %}fa-solid{% else %}fa-regular{% endif %} fa-star"></i>
+            <!-- Star 5 -->
             <i class="{% if testimonial.rating >= 5 %}fa-solid{% else %}fa-regular{% endif %} fa-star"></i>
           </div>
+          
+          <!-- Review message/content -->
           <p class="review-message">{{ testimonial.message }}</p>
+          
+          <!-- Reviewer username -->
           <p class="review-user">{{ testimonial.user.username }}</p>
+          
+          <!-- Reviewer role (Tenant or Property Owner) -->
           <p class="review-role">{{ testimonial.get_role_display }}</p>
         </article>
       </div>
     {% empty %}
+      <!-- Empty state: show when no testimonials exist -->
       <div class="col-12">
         <div class="review-empty">No testimonials yet. Be the first to share your experience.</div>
       </div>

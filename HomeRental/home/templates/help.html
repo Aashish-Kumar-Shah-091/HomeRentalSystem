@@ -1,8 +1,16 @@
 {% extends "base.html" %}
 
+<!-- Template: Help/Contact Support Page
+     Purpose: Provide platform support through contact form, direct contact info, and FAQ section
+     Features: Contact form (name, email, subject, message), direct support contact options, searchable FAQ accordion
+     For: Users to get help with bookings, listings, account issues, or general inquiries
+     Contact Options: Email, phone, WhatsApp; FAQ search functionality
+-->
+
 {% block title %}Contact Support - Ghar Setu{% endblock %}
 
 {% block extra_head %}
+<!-- Page-specific styling for contact form, contact cards, and FAQ section -->
 <style>
   .contact-hero {
     border-radius: 1rem;
@@ -58,15 +66,23 @@
 {% endblock %}
 
 {% block content %}
+<!-- Main help/support page: Contact hero, contact details, contact form, and FAQ -->
 <section class="container py-4 py-lg-5">
+  
+  <!-- HERO SECTION: Page title and introduction -->
   <section class="contact-hero shadow-sm mb-4 mb-lg-5">
+    <!-- Hero content with page title and description -->
     <div class="contact-hero-content">
+      <!-- Section label -->
       <p class="text-uppercase fw-semibold small mb-2">Contact Center</p>
+      <!-- Main headline -->
       <h1 class="display-5 fw-bold mb-3">Need help with booking, listing, or account setup?</h1>
+      <!-- Description -->
       <p class="mb-0 text-white-50">Send us your message and our team will guide you with a clear next step.</p>
     </div>
   </section>
 
+  <!-- ALERTS: Display success/error messages from form submission -->
   {% if messages %}
     {% for message in messages %}
       <div class="alert {% if 'success' in message.tags %}alert-success{% else %}alert-danger{% endif %} shadow-sm mb-4">
@@ -75,49 +91,68 @@
     {% endfor %}
   {% endif %}
 
+  <!-- MAIN CONTENT: Two-column layout - Contact info (left) and contact form + FAQ (right) -->
   <div class="row g-4">
+    
+    <!-- LEFT COLUMN: Contact details and images -->
     <div class="col-12 col-lg-5">
       <div class="card contact-card h-100">
         <div class="card-body p-4">
+          <!-- Section title -->
           <h2 class="h4 fw-bold mb-3">Contact Details</h2>
+          <!-- Section description -->
           <p class="text-muted mb-4">Reach us directly or leave a message through the form.</p>
 
+          <!-- EMAIL CONTACT INFO -->
           <div class="contact-info-item mb-3">
             <div class="d-flex justify-content-between align-items-start gap-2">
+              <!-- Email label and address -->
               <div>
                 <p class="small text-muted mb-1">Email</p>
                 <p class="mb-0 fw-semibold">support@homerental.com</p>
               </div>
+              <!-- Copy email button -->
               <button type="button" class="btn btn-outline-secondary btn-sm copy-btn" data-copy-target="support@homerental.com">Copy</button>
             </div>
           </div>
 
+          <!-- PHONE CONTACT INFO -->
           <div class="contact-info-item mb-3">
             <div class="d-flex justify-content-between align-items-start gap-2">
+              <!-- Phone label and number -->
               <div>
                 <p class="small text-muted mb-1">Phone</p>
                 <p class="mb-0 fw-semibold">+977 9800000000</p>
               </div>
+              <!-- Copy phone button -->
               <button type="button" class="btn btn-outline-secondary btn-sm copy-btn" data-copy-target="+977 9800000000">Copy</button>
             </div>
           </div>
 
+          <!-- OFFICE LOCATION -->
           <div class="contact-info-item mb-4">
             <p class="small text-muted mb-1">Office</p>
             <p class="mb-0 fw-semibold">Putalisadak, Kathmandu, Nepal</p>
           </div>
 
+          <!-- CTA BUTTONS: Email and call buttons -->
           <div class="d-grid gap-2">
+            <!-- Email button with pre-filled subject -->
             <a class="btn btn-primary" href="mailto:support@homerental.com?subject=Support%20Request%20from%20Ghar%20Setu">Send Email Now</a>
+            <!-- Phone call button -->
             <a class="btn btn-outline-primary" href="tel:+9779800000000">Call Support</a>
           </div>
 
+          <!-- DIVIDER -->
           <hr class="my-4">
 
+          <!-- SUPPORT TEAM IMAGES -->
           <div class="row g-3">
+            <!-- Image 1: Support team collaboration -->
             <div class="col-12 col-sm-6 col-lg-12">
               <img class="contact-image" src="https://images.unsplash.com/photo-1552581234-26160f608093?auto=format&fit=crop&w=900&q=80" alt="Support team collaboration">
             </div>
+            <!-- Image 2: Customer support desk -->
             <div class="col-12 col-sm-6 col-lg-12">
               <img class="contact-image" src="https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=900&q=80" alt="Customer support call desk">
             </div>
@@ -126,70 +161,98 @@
       </div>
     </div>
 
+    <!-- RIGHT COLUMN: Contact form and FAQ section -->
     <div class="col-12 col-lg-7">
+      
+      <!-- CONTACT FORM CARD -->
       <div class="card contact-card mb-4">
         <div class="card-body p-4 p-lg-5">
+          <!-- Form title -->
           <h2 class="h4 fw-bold mb-2">Send a Message</h2>
+          <!-- Form description -->
           <p class="text-muted mb-4">We usually reply within one business day.</p>
 
+          <!-- Contact form -->
           <form id="contactForm" method="post" novalidate>
             {% csrf_token %}
 
+            <!-- Form fields grid -->
             <div class="row g-3">
+              
+              <!-- Full Name field -->
               <div class="col-12 col-md-6">
                 <label class="form-label fw-semibold" for="id_name">Full Name</label>
                 <input class="form-control" id="id_name" name="name" type="text" required value="{{ form_data.name|default_if_none:'' }}">
               </div>
 
+              <!-- Email field -->
               <div class="col-12 col-md-6">
                 <label class="form-label fw-semibold" for="id_email">Email</label>
                 <input class="form-control" id="id_email" name="email" type="email" required value="{{ form_data.email|default_if_none:'' }}">
               </div>
 
+              <!-- Subject field -->
               <div class="col-12 col-md-7">
                 <label class="form-label fw-semibold" for="id_subject">Subject</label>
                 <input class="form-control" id="id_subject" name="subject" type="text" required value="{{ form_data.subject|default_if_none:'' }}">
               </div>
 
+              <!-- Preferred contact method dropdown -->
               <div class="col-12 col-md-5">
                 <label class="form-label fw-semibold" for="id_preferred_contact">Preferred Contact</label>
                 <select class="form-select" id="id_preferred_contact" name="preferred_contact">
+                  <!-- Email option -->
                   <option value="email" {% if form_data.preferred_contact == "email" %}selected{% endif %}>Email</option>
+                  <!-- Phone call option -->
                   <option value="call" {% if form_data.preferred_contact == "call" %}selected{% endif %}>Phone Call</option>
+                  <!-- WhatsApp option -->
                   <option value="whatsapp" {% if form_data.preferred_contact == "whatsapp" %}selected{% endif %}>WhatsApp</option>
                 </select>
               </div>
 
+              <!-- Message textarea -->
               <div class="col-12">
                 <label class="form-label fw-semibold" for="id_message">Message</label>
+                <!-- Character limit: 1000 characters -->
                 <textarea class="form-control" id="id_message" name="message" rows="6" maxlength="1000" required>{{ form_data.message|default_if_none:'' }}</textarea>
+                <!-- Helper text and character counter -->
                 <div class="d-flex justify-content-between mt-1">
                   <small class="text-muted">Please include enough detail so we can help faster.</small>
+                  <!-- Character counter display -->
                   <span class="message-counter" id="messageCounter">0 / 1000</span>
                 </div>
               </div>
             </div>
 
+            <!-- Submit button -->
             <button id="contactSubmitButton" class="btn btn-primary mt-4" type="submit">Send Message</button>
           </form>
         </div>
       </div>
 
+      <!-- FAQ CARD -->
       <div class="card contact-card">
         <div class="card-body p-4 p-lg-5">
+          <!-- FAQ header with title and search field -->
           <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+            <!-- FAQ title -->
             <h2 class="h5 fw-bold mb-0">Frequently Asked Questions</h2>
+            <!-- FAQ search input field -->
             <input id="faqSearch" class="form-control faq-search" type="search" placeholder="Search question">
           </div>
 
+          <!-- FAQ accordion: Display questions and answers -->
           <div class="accordion" id="helpFaqAccordion">
             {% for faq in faq_items %}
+              <!-- Individual FAQ item -->
               <div class="accordion-item mb-2 rounded faq-item" data-faq-item data-keywords="{{ faq.keywords|lower }}">
+                <!-- Accordion button: Clickable question -->
                 <h3 class="accordion-header" id="faqHeading{{ forloop.counter }}">
                   <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse{{ forloop.counter }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="faqCollapse{{ forloop.counter }}">
                     {{ faq.question }}
                   </button>
                 </h3>
+                <!-- Accordion content: Answer (hidden until clicked) -->
                 <div id="faqCollapse{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="faqHeading{{ forloop.counter }}" data-bs-parent="#helpFaqAccordion">
                   <div class="accordion-body">
                     {{ faq.answer }}
@@ -198,6 +261,8 @@
               </div>
             {% endfor %}
           </div>
+          
+          <!-- Empty state: Show when search has no results -->
           <p id="faqEmpty" class="text-muted small mb-0 d-none">No matching FAQ found.</p>
         </div>
       </div>
@@ -206,9 +271,12 @@
 </section>
 {% endblock %}
 
+<!-- EXTRA SCRIPTS: JavaScript for form interactions and FAQ search functionality -->
 {% block extra_scripts %}
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+    
+    /* CHARACTER COUNTER: Updates message character count display */
     var messageInput = document.getElementById("id_message");
     var messageCounter = document.getElementById("messageCounter");
     if (messageInput && messageCounter) {
@@ -216,10 +284,11 @@
         var length = messageInput.value.length;
         messageCounter.textContent = length + " / 1000";
       };
-      updateCounter();
-      messageInput.addEventListener("input", updateCounter);
+      updateCounter(); // Initial count
+      messageInput.addEventListener("input", updateCounter); // Update on each keystroke
     }
 
+    /* FAQ SEARCH: Filters FAQ items based on search query */
     var faqSearch = document.getElementById("faqSearch");
     var faqItems = document.querySelectorAll("[data-faq-item]");
     var faqEmpty = document.getElementById("faqEmpty");
@@ -236,12 +305,14 @@
             visibleCount += 1;
           }
         });
+        // Show empty state if no results
         if (faqEmpty) {
           faqEmpty.classList.toggle("d-none", visibleCount > 0);
         }
       });
     }
 
+    /* COPY TO CLIPBOARD: Copies contact info (email/phone) to clipboard */
     var copyButtons = document.querySelectorAll("[data-copy-target]");
     copyButtons.forEach(function (button) {
       button.addEventListener("click", function () {
@@ -249,16 +320,19 @@
         var restoreLabel = button.textContent;
         var setCopiedLabel = function () {
           button.textContent = "Copied";
+          // Reset button text after 1.2 seconds
           window.setTimeout(function () {
             button.textContent = restoreLabel;
           }, 1200);
         };
 
+        // Modern clipboard API (preferred, requires HTTPS)
         if (navigator.clipboard && window.isSecureContext) {
           navigator.clipboard.writeText(value).then(setCopiedLabel);
           return;
         }
 
+        // Fallback for older browsers: use textarea trick
         var helper = document.createElement("textarea");
         helper.value = value;
         document.body.appendChild(helper);
@@ -269,6 +343,7 @@
       });
     });
 
+    /* FORM SUBMISSION: Disable submit button and show loading state */
     var contactForm = document.getElementById("contactForm");
     var submitButton = document.getElementById("contactSubmitButton");
     if (contactForm && submitButton) {

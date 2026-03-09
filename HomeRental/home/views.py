@@ -1,3 +1,9 @@
+"""
+Views Module - Home Rental System
+Handles all request-response logic for the application.
+Contains views for property management, bookings, notifications, user profiles, and authentication.
+"""
+
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404, redirect
 from .models import (
@@ -28,10 +34,13 @@ from django.utils import timezone
 import re
 from urllib.parse import quote
 
-User = get_user_model()
+User = get_user_model()  # Get the User model for use throughout views
 
 def about(request):
-    """Display the about page with company info, stats, team, and FAQs"""
+    """
+    Display the about page with company information, statistics, team members, and features.
+    Shows company overview, team details, FAQs, and service features.
+    """
     stats = [
         {'number': '5,000+', 'label': 'Properties Listed'},
         {'number': '10,000+', 'label': 'Happy Tenants'},
@@ -135,6 +144,10 @@ def about(request):
 
 
 def index(request):
+    """
+    Display homepage with latest testimonials.
+    Shows 6 most recent testimonials from users to showcase platform credibility.
+    """
     testimonials = Testimonial.objects.select_related("user").order_by("-created_at")[:6]
     return render(
         request,
@@ -146,11 +159,19 @@ def index(request):
 
 
 def reviews(request):
+    """
+    Display reviews page and handle new testimonial submissions.
+    
+    GET: Show all testimonials and empty form for new submission
+    POST: Save new testimonial if user is authenticated
+    """
     if request.method == "POST":
+        # Check if user is logged in before accepting testimonial
         if not request.user.is_authenticated:
             return redirect("login")
         testimonial_form = TestimonialForm(request.POST)
         if testimonial_form.is_valid():
+            # Save testimonial with current user
             testimonial = testimonial_form.save(commit=False)
             testimonial.user = request.user
             testimonial.save()
@@ -158,6 +179,7 @@ def reviews(request):
     else:
         testimonial_form = TestimonialForm()
 
+    # Display all testimonials sorted by most recent
     testimonials = Testimonial.objects.select_related("user").order_by("-created_at")
     return render(
         request,
@@ -170,8 +192,15 @@ def reviews(request):
 
 
 def help_page(request):
+    """
+    Display help page with FAQ section and contact form.
+    
+    GET: Show FAQ and contact form
+    POST: Validate and process contact form submission
+    """
+    # FAQ items with keywords for search functionality
     faq_items = [
-        {
+                {
             "question": "How do I create an account?",
             "answer": "Go to Register from the navbar, fill in your details, and submit the form to create your account.",
             "keywords": "account register sign up login",
@@ -198,6 +227,7 @@ def help_page(request):
         },
     ]
 
+    # Pre-fill form with logged-in user's data if available
     form_data = {
         "name": request.user.get_full_name() if request.user.is_authenticated else "",
         "email": request.user.email if request.user.is_authenticated else "",
@@ -206,7 +236,9 @@ def help_page(request):
         "preferred_contact": "email",
     }
 
+    # Handle contact form submission
     if request.method == "POST":
+        # Collect form data from POST request
         form_data = {
             "name": request.POST.get("name", "").strip(),
             "email": request.POST.get("email", "").strip(),
@@ -215,9 +247,11 @@ def help_page(request):
             "preferred_contact": request.POST.get("preferred_contact", "email").strip() or "email",
         }
 
+        # Validate all required fields are filled
         required_values = [form_data["name"], form_data["email"], form_data["subject"], form_data["message"]]
         if not all(required_values):
             messages.error(request, "Please complete all required fields before sending your message.")
+        # Validate message has minimum length
         elif len(form_data["message"]) < 20:
             messages.error(request, "Please write at least 20 characters in your message for better support.")
         else:
@@ -243,16 +277,27 @@ def help_page(request):
 
 
 def home_list(request):
+    """
+    Display all home entries ordered by most recent.
+    Legacy functionality for storing general home-related content.
+    """
     homes = home.objects.all().order_by('-created_at')
     return render(request, 'home_list.html', {'homes': homes})
 
-@login_required
+@login_required  # User must be logged in to create
 def home_create(request):
+    """
+    Create a new home entry with text and photo.
+    Only accessible to authenticated users.
+    
+    GET: Display empty form
+    POST: Save new home entry with authenticated user as creator
+    """
     if request.method == "POST":
         form = homeForm(request.POST, request.FILES)
         if form.is_valid():
             home_obj = form.save(commit=False)
-            home_obj.user = request.user
+            home_obj.user = request.user  # Associate with current user
             home_obj.save()
             return redirect('home_list')
     else:
@@ -261,7 +306,14 @@ def home_create(request):
 
 @login_required
 def home_edit(request, home_id):
-    home_obj = get_object_or_404(home, pk=home_id, user=request.user)
+    """
+    Edit an existing home entry.
+    Only the owner of the entry can edit it.
+    
+    GET: Display pre-filled form
+    POST: Update home entry in database
+    """
+    home_obj = get_object_or_404(home, pk=home_id, user=request.user)  # Verify ownership
     if request.method == 'POST':
         form = homeForm(request.POST, request.FILES, instance=home_obj)
         if form.is_valid():
@@ -275,33 +327,53 @@ def home_edit(request, home_id):
 
 @login_required
 def home_delete(request, home_id):
-    home_obj = get_object_or_404(home, pk=home_id, user=request.user)
+    """
+    Delete a home entry after confirmation.
+    Only the owner can delete their own entries.
+    
+    GET: Display confirmation page
+    POST: Delete entry from database
+    """
+    home_obj = get_object_or_404(home, pk=home_id, user=request.user)  # Verify ownership
     if request.method == 'POST':
         home_obj.delete()
         return redirect('home_list')
     return render(request, 'home_confirm_delete.html', {'home': home_obj})
 
-# for the  login gistration
+
 def register(request):
+    """
+    User registration page.
+    Handles user account creation with validation.
+    
+    GET: Display registration form
+    POST: Create new user if form is valid, then auto-login and redirect
+    """
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            login(request, user)
+            user = form.save()  # Create new user
+            login(request, user)  # Auto-login after registration
             return redirect('home_list')
     else:
         form = UserRegistrationForm()
-    return render(request, 'registration/register.html', {'form':form})
+    return render(request, 'registration/register.html', {'form': form})
 
 
-# For the property.html
 @login_required
 def add_property(request):
+    """
+    Add a new property listing.
+    Only accessible to authenticated users (property owners).
+    
+    GET: Display empty property form
+    POST: Create new property listing with current user as owner
+    """
     if request.method == 'POST':
         form = PropertyForm(request.POST, request.FILES)
         if form.is_valid():
             prop = form.save(commit=False)
-            prop.user = request.user
+            prop.user = request.user  # Set property owner
             prop.save()
             return redirect('properties')
     else:
@@ -311,19 +383,31 @@ def add_property(request):
 
 
 def property_list(request):
-    sort_option = request.GET.get("sort", "")
-    selected_location = request.GET.get("location", "")
+    """
+    Display all properties with filtering and sorting options.
+    
+    Supports:
+    - Location filtering: Filter by property location
+    - Price sorting: Sort by price (low to high or high to low)
+    - Favorites tracking: Shows which properties user has favorited
+    """
+    sort_option = request.GET.get("sort", "")  # Get sort parameter from URL
+    selected_location = request.GET.get("location", "")  # Get location filter from URL
 
+    # Start with all properties
     properties = Property.objects.all()
 
+    # Apply location filter if selected
     if selected_location:
         properties = properties.filter(location__iexact=selected_location)
 
+    # Apply price sorting
     if sort_option == "low_to_high":
         properties = properties.order_by("price")
     elif sort_option == "high_to_low":
         properties = properties.order_by("-price")
 
+    # Get all unique locations for filter dropdown
     locations = (
         Property.objects.exclude(location__isnull=True)
         .exclude(location__exact="")
@@ -332,6 +416,7 @@ def property_list(request):
         .distinct()
     )
 
+    # Build context dictionary with required data
     context = {
         "properties": properties,
         "locations": locations,
@@ -340,6 +425,7 @@ def property_list(request):
         "favorite_property_ids": set(),
     }
 
+    # If user is logged in, get their favorite properties
     if request.user.is_authenticated:
         context["favorite_property_ids"] = set(
             Favorite.objects.filter(user=request.user).values_list("property_id", flat=True)
@@ -348,16 +434,25 @@ def property_list(request):
     return render(request, "property_list.html", context)
 
 def property_detail(request, property_id):
-    property_obj = get_object_or_404(Property, pk=property_id)
-    is_compact_view = request.GET.get('view') == 'compact'
+    """
+    Display detailed information about a specific property.
+    Shows all property details, contact info, map, and booked tenants (if owner).
+    
+    For property owners, displays list of users who have booked this property.
+    """
+    property_obj = get_object_or_404(Property, pk=property_id)  # Get property or 404
+    is_compact_view = request.GET.get('view') == 'compact'  # Check for compact view mode
     booked_tenants = []
 
+    # If current user is the property owner, show list of tenants who booked
     if request.user.is_authenticated and request.user == property_obj.user:
+        # Get all bookings for this property
         property_bookings = Booking.objects.filter(
             property=property_obj,
             owner=request.user,
         ).select_related('booked_by').order_by('-booked_at')
 
+        # Build list of unique tenants (avoid duplicates if user booked multiple times)
         seen_user_ids = set()
         for booking in property_bookings:
             if booking.booked_by_id not in seen_user_ids:
@@ -374,6 +469,7 @@ def property_detail(request, property_id):
         'is_compact_view': is_compact_view,
         'booked_tenants': booked_tenants,
         'is_favorited': (
+            # Check if current user has this property in favorites
             request.user.is_authenticated
             and Favorite.objects.filter(user=request.user, property=property_obj).exists()
         ),
@@ -382,7 +478,14 @@ def property_detail(request, property_id):
 
 @login_required
 def property_edit(request, property_id):
-    prop = get_object_or_404(Property, pk=property_id, user=request.user)
+    """
+    Edit an existing property listing.
+    Only the property owner can edit their listing.
+    
+    GET: Display pre-filled property form
+    POST: Update property in database
+    """
+    prop = get_object_or_404(Property, pk=property_id, user=request.user)  # Verify ownership
     if request.method == 'POST':
         form = PropertyForm(request.POST, request.FILES, instance=prop)
         if form.is_valid():
@@ -397,7 +500,14 @@ def property_edit(request, property_id):
 
 @login_required
 def property_delete(request, property_id):
-    prop = get_object_or_404(Property, pk=property_id, user=request.user)
+    """
+    Delete a property listing.
+    Only the property owner can delete their listing.
+    
+    GET: Display confirmation page
+    POST: Delete property from database
+    """
+    prop = get_object_or_404(Property, pk=property_id, user=request.user)  # Verify ownership
     if request.method == 'POST':
         prop.delete()
         return redirect('properties')
@@ -406,65 +516,101 @@ def property_delete(request, property_id):
 
 @login_required
 def toggle_favorite(request, property_id):
+    """
+    Add or remove a property from user's favorites (bookmarks).
+    
+    POST only: Toggles favorite status - adds if not favorited, removes if already favorited
+    Redirects back to previous page after action
+    """
     if request.method != "POST":
         return redirect(request.META.get("HTTP_REFERER", "properties"))
 
     property_obj = get_object_or_404(Property, pk=property_id)
     favorite = Favorite.objects.filter(user=request.user, property=property_obj).first()
 
+    # Remove favorite if exists, otherwise create new
     if favorite:
-        favorite.delete()
+        favorite.delete()  # Un-favorite
     else:
-        Favorite.objects.create(user=request.user, property=property_obj)
+        Favorite.objects.create(user=request.user, property=property_obj)  # Add to favorites
 
     return redirect(request.META.get("HTTP_REFERER", "properties"))
 
 
 @login_required
 def favorite_list(request):
+    """
+    Display user's list of favorited (saved) properties.
+    Shows all properties the user has bookmarked, sorted by most recent.
+    """
     favorites = (
         Favorite.objects.filter(user=request.user)
         .select_related("property")
-        .order_by("-created_at")
+        .order_by("-created_at")  # Most recently favorited first
     )
     return render(request, "favorite_list.html", {"favorites": favorites})
 
 
 @login_required
 def book_property(request, property_id):
+    """
+    Create a booking request for a property.
+    
+    POST only: Creates or updates a booking request from tenant to property owner
+    Prevents users from booking their own properties
+    """
     property = get_object_or_404(Property, id=property_id)
 
+    # Only allow booking if user is not the property owner
     if request.method == "POST" and request.user != property.user:
+        # Try to get existing booking, create if doesn't exist
         booking, created = Booking.objects.get_or_create(
             property=property,
             booked_by=request.user,
             owner=property.user,
         )
+        # If booking already existed, reset notification flags
         if not created:
             booking.is_read = False
             booking.is_accepted = False
-            booking.booked_at = timezone.now()
+            booking.booked_at = timezone.now()  # Update booking timestamp
             booking.save(update_fields=["is_read", "is_accepted", "booked_at"])
 
     return redirect('properties')
 
 @login_required
 def notifications(request):
+    """
+    Display all notifications for the current user.
+    
+    Handles three types of notifications:
+    1. Booking requests (for property owners)
+    2. Booking cancellations (for tenants)
+    3. Booking acceptances (for tenants)
+    
+    GET: Mark all unread notifications as read and display them
+    """
+    # Fetch owner bookings (booking requests from tenants)
     owner_notifications_qs = request.user.owner_bookings.select_related(
         "booked_by", "property"
     )
+    # Fetch cancellation notifications for current user
     tenant_notifications_qs = request.user.cancellation_notifications.select_related(
         "owner", "property"
     )
+    # Fetch acceptance notifications for current user
     tenant_acceptance_qs = request.user.acceptance_notifications.select_related(
         "owner", "owner__profile", "property"
     )
 
+    # Mark all unread notifications as read on GET request
     if request.method == "GET":
         owner_notifications_qs.filter(is_read=False).update(is_read=True)
         tenant_notifications_qs.filter(is_read=False).update(is_read=True)
         tenant_acceptance_qs.filter(is_read=False).update(is_read=True)
 
+    # ===== BUILD OWNER NOTIFICATIONS =====
+    # Bookings on properties owned by user
     notifications = []
     for item in owner_notifications_qs:
         notifications.append(
@@ -472,13 +618,15 @@ def notifications(request):
                 "message": f"{item.booked_by.username} booked your property {item.property.title}",
                 "created_at": item.booked_at,
                 "is_read": item.is_read,
-                "can_cancel": item.is_read,
-                "can_accept": item.is_read and not item.is_accepted,
+                "can_cancel": item.is_read,  # Can cancel after owner has seen notification
+                "can_accept": item.is_read and not item.is_accepted,  # Can accept if not already accepted
                 "is_accepted": item.is_accepted,
                 "booking_id": item.id,
             }
         )
 
+    # ===== BUILD TENANT CANCELLATION NOTIFICATIONS =====
+    # When owner cancels tenant's booking
     for item in tenant_notifications_qs:
         notifications.append(
             {
@@ -492,14 +640,19 @@ def notifications(request):
             }
         )
 
+    # ===== BUILD TENANT ACCEPTANCE NOTIFICATIONS =====
+    # When owner accepts tenant's booking
     for item in tenant_acceptance_qs:
         owner_phone = ""
+        # Extract owner's phone number if available (for WhatsApp link)
         if hasattr(item.owner, "profile") and item.owner.profile.phone_number:
-            # wa.me expects digits with country code and no symbols.
+            # Remove all non-digits (wa.me expects digits only with country code)
             owner_phone = re.sub(r"\D", "", item.owner.profile.phone_number)
 
+        # Generate WhatsApp URL if owner has phone number
         whatsapp_url = ""
         if owner_phone:
+            # Create pre-filled WhatsApp message
             msg = quote(
                 f"Hello, I have booked your property {item.property.title}."
             )
@@ -518,6 +671,7 @@ def notifications(request):
             }
         )
 
+    # Sort all notifications by date (newest first)
     notifications.sort(key=lambda n: n["created_at"], reverse=True)
 
     return render(request, 'notifications.html', {
@@ -527,9 +681,16 @@ def notifications(request):
 
 @login_required
 def cancel_booking(request, booking_id):
+    """
+    Cancel a booking request (owner only).
+    
+    POST only: Owner can cancel a booking and send cancellation notification to tenant
+    Creates a BookingCancellationNotification record so tenant is notified
+    """
     if request.method != "POST":
         return redirect(request.META.get('HTTP_REFERER', 'properties'))
 
+    # Only property owner can cancel - verify with is_read check
     booking = Booking.objects.filter(
         pk=booking_id,
         owner=request.user,
@@ -539,34 +700,47 @@ def cancel_booking(request, booking_id):
     if not booking:
         return redirect(request.META.get('HTTP_REFERER', 'properties'))
 
+    # Create notification for tenant about cancellation
     BookingCancellationNotification.objects.create(
         property=booking.property,
         tenant=booking.booked_by,
         owner=booking.owner,
     )
+    # Delete the original booking
     booking.delete()
     return redirect(request.META.get('HTTP_REFERER', 'properties'))
 
 
 @login_required
 def accept_booking(request, booking_id):
+    """
+    Accept a booking request (owner only).
+    
+    POST only: Owner can accept a booking request
+    Creates a BookingAcceptanceNotification so tenant is notified
+    Sets booking.is_accepted to True to prevent further changes
+    """
     if request.method != "POST":
         return redirect(request.META.get('HTTP_REFERER', 'notifications'))
 
+    # Only property owner can accept - verify with is_read check
     booking = Booking.objects.filter(
         pk=booking_id,
         owner=request.user,
         is_read=True,
     ).first()
 
+    # Don't allow accepting if already accepted or booking doesn't exist
     if not booking or booking.is_accepted:
         return redirect(request.META.get('HTTP_REFERER', 'notifications'))
 
+    # Create acceptance notification for tenant
     BookingAcceptanceNotification.objects.create(
         property=booking.property,
         tenant=booking.booked_by,
         owner=booking.owner,
     )
+    # Mark booking as accepted
     booking.is_accepted = True
     booking.save(update_fields=["is_accepted"])
     return redirect(request.META.get('HTTP_REFERER', 'notifications'))
@@ -574,8 +748,15 @@ def accept_booking(request, booking_id):
 
 @login_required
 def tenant_profile(request, user_id):
+    """
+    View a tenant's profile (owner only).
+    Shows tenant information and their bookings on owner's properties.
+    
+    Security: Only shows profile if current user has had bookings with this tenant
+    """
     tenant = get_object_or_404(User, pk=user_id)
 
+    # Security check: only allow viewing if owner has booked with this tenant
     can_view = Booking.objects.filter(
         owner=request.user,
         booked_by=tenant,
@@ -584,7 +765,9 @@ def tenant_profile(request, user_id):
     if not can_view:
         return HttpResponseForbidden("You are not allowed to view this profile.")
 
+    # Get tenant's profile info if exists
     tenant_profile_obj = Profile.objects.filter(user=tenant).first()
+    # Get all bookings this tenant made on owner's properties
     tenant_bookings = Booking.objects.filter(
         owner=request.user,
         booked_by=tenant,
@@ -603,6 +786,12 @@ def tenant_profile(request, user_id):
 
 @login_required
 def mark_notification_read(request, notification_id):
+    """
+    Mark a single notification as read.
+    
+    POST only: Sets is_read flag on notification to True
+    Used when user clicks on a notification to read it
+    """
     notification = get_object_or_404(
         Booking, pk=notification_id, owner=request.user
     )
@@ -616,12 +805,21 @@ def mark_notification_read(request, notification_id):
 
 @login_required
 def mark_all_notifications_read(request):
+    """
+    Mark all notifications for current user as read.
+    
+    POST only: Updates is_read flag across all notification types
+    Useful for "Mark all as read" button in notification panel
+    """
     if request.method == 'POST':
+        # Mark all booking notifications as read
         Booking.objects.filter(owner=request.user, is_read=False).update(is_read=True)
+        # Mark all cancellation notifications as read
         BookingCancellationNotification.objects.filter(
             tenant=request.user,
             is_read=False,
         ).update(is_read=True)
+        # Mark all acceptance notifications as read
         BookingAcceptanceNotification.objects.filter(
             tenant=request.user,
             is_read=False,
@@ -632,18 +830,29 @@ def mark_all_notifications_read(request):
 
 @login_required
 def profile(request):
+    """
+    Display and edit user profile.
+    Shows user account info and profile information with photo.
+    
+    GET: Display current profile information
+    POST: Update user and profile information
+    """
+    # Get or create user profile
     profile_obj, _ = Profile.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
+        # Process both user form and profile form
         user_form = UserUpdateForm(request.POST, instance=request.user)
         profile_form = ProfileUpdateForm(
             request.POST, request.FILES, instance=profile_obj
         )
+        # Save both forms if valid
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
             return redirect("profile")
     else:
+        # Load existing data into forms
         user_form = UserUpdateForm(instance=request.user)
         profile_form = ProfileUpdateForm(instance=profile_obj)
 

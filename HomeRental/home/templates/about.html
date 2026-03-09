@@ -1,8 +1,16 @@
 {% extends "layout.html" %}
 
+<!-- Template: About Page
+     Purpose: Showcase company information, mission, vision, team, and platform features
+     Features: Hero banner, mission/vision statements, feature cards, team member profiles, gallery, CTA
+     For: Users wanting to learn about the platform and its team
+     Responsive: Fully responsive with cards that adapt to mobile/tablet/desktop layouts
+-->
+
 {% block title %}About - Ghar Setu{% endblock %}
 
 {% block extra_head %}
+<!-- Page-specific styling for about page components: hero, cards, team section, gallery -->
 <style>
   .about-hero {
     border-radius: 1.25rem;
@@ -84,31 +92,42 @@
 {% endblock %}
 
 {% block content %}
+<!-- Main about page content: Company info, mission, features, team -->
 <section class="py-5 bg-light">
   <div class="container">
 
+    <!-- HERO SECTION: Large banner with company tagline and value proposition -->
     <section class="about-hero shadow mb-5 p-4 p-md-5 d-flex align-items-end">
+      <!-- Hero content container positioned at bottom of banner -->
       <div class="hero-content text-white col-12 col-lg-8">
+        <!-- Section label/tag -->
         <p class="section-label text-white-50 mb-2">About Ghar Setu</p>
+        <!-- Main headline with company value proposition -->
         <h1 class="display-5 fw-bold mb-3">Renting Should Feel Simple, Safe, and Transparent</h1>
+        <!-- Subheading describing platform benefits -->
         <p class="lead mb-0">
           We help tenants discover trusted homes and help owners manage listings with less friction.
         </p>
       </div>
     </section>
 
+    <!-- MISSION & VISION SECTION: Two-column cards with core company statements -->
     <section class="row g-4 mb-5">
+      <!-- Mission card: Company purpose and goals -->
       <div class="col-md-6">
         <div class="glass-card hover-lift h-100 p-4 shadow-sm">
           <h2 class="h5 fw-bold mb-3">Our Mission</h2>
+          <!-- Mission statement -->
           <p class="text-muted mb-0">
             To make house renting simple, transparent, and secure for both tenants and landlords.
           </p>
         </div>
       </div>
+      <!-- Vision card: Company future direction -->
       <div class="col-md-6">
         <div class="glass-card hover-lift h-100 p-4 shadow-sm">
           <h2 class="h5 fw-bold mb-3">Our Vision</h2>
+          <!-- Vision statement -->
           <p class="text-muted mb-0">
             To be the most trusted rental platform where people can find and manage homes without confusion.
           </p>
@@ -116,36 +135,28 @@
       </div>
     </section>
 
-    {% comment %} <section class="mb-5">
-      <div class="d-flex justify-content-between align-items-end mb-3">
-        <h2 class="h4 fw-bold mb-0">Our Impact</h2>
-        <span class="text-muted small">Updated from platform activity</span>
-      </div>
-      <div class="row g-4">
-        {% for stat in stats %}
-        <div class="col-6 col-lg-3">
-          <div class="card hover-lift text-center shadow-sm h-100 border-0">
-            <div class="card-body">
-              <h3 class="stats-number mb-1" data-counter="{{ stat.number }}">0</h3>
-              <p class="text-muted mb-0">{{ stat.label }}</p>
-            </div>
-          </div>
-        </div>
-        {% endfor %}
-      </div>
-    </section> {% endcomment %}
+    <!-- COMMENTED IMPACT SECTION: Stats would display here if uncommented -->
+    <!-- Statistics showing platform activity could be inserted here -->
 
+    <!-- WHY CHOOSE US SECTION: Feature cards highlighting platform benefits -->
     <section class="mb-5">
+      <!-- Section title -->
       <h2 class="h4 fw-bold mb-4">Why Choose Us</h2>
+      <!-- Feature cards in responsive grid (3 columns on desktop, 2 on tablet, 1 on mobile) -->
       <div class="row g-4">
         {% for feature in features %}
+        <!-- Individual feature card with icon and description -->
         <div class="col-md-6 col-lg-4">
           <div class="card hover-lift shadow-sm h-100 border-0">
             <div class="card-body">
+              <!-- Feature icon container with blue background -->
               <div class="feature-icon-wrap mb-3">
+                <!-- FontAwesome icon dynamically loaded from feature.icon -->
                 <i class="fas {{ feature.icon }} text-primary"></i>
               </div>
+              <!-- Feature title -->
               <h3 class="h6 fw-bold">{{ feature.title }}</h3>
+              <!-- Feature description -->
               <p class="text-muted mb-0">{{ feature.description }}</p>
             </div>
           </div>
@@ -154,33 +165,47 @@
       </div>
     </section>
 
+    <!-- GALLERY SECTION: Image showcase of rental properties -->
     <section class="mb-5">
+      <!-- Section title -->
       <h2 class="h4 fw-bold mb-4">Inside Our Rental Journey</h2>
+      <!-- Three-column image gallery with hover zoom effect -->
       <div class="row g-3 mini-gallery">
+        <!-- Gallery image 1: Modern living room -->
         <div class="col-12 col-md-4">
           <img src="https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=900&q=80" alt="Modern living room">
         </div>
+        <!-- Gallery image 2: Comfortable bedroom -->
         <div class="col-12 col-md-4">
           <img src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80" alt="Comfortable bedroom">
         </div>
+        <!-- Gallery image 3: Stylish kitchen -->
         <div class="col-12 col-md-4">
           <img src="https://images.unsplash.com/photo-1464146072230-91cabc968266?auto=format&fit=crop&w=900&q=80" alt="Stylish kitchen area">
         </div>
       </div>
     </section>
 
+    <!-- TEAM SECTION: Display team members with profiles -->
     <section class="mb-5">
+      <!-- Section title -->
       <h2 class="h4 fw-bold mb-4">Our Team</h2>
+      <!-- Team members grid (4 columns on desktop, responsive on smaller screens) -->
       <div class="row g-4">
         {% for member in team_members %}
+        <!-- Individual team member card -->
         <div class="col-md-6 col-lg-3">
           <div class="card hover-lift text-center shadow-sm h-100 border-0">
             <div class="card-body">
+              <!-- Team member profile image (if available) -->
               {% if member.image %}
               <img class="team-avatar mb-3" src="{{ member.image }}" alt="{{ member.name }}">
               {% endif %}
+              <!-- Team member name -->
               <h3 class="h6 fw-bold mb-1">{{ member.name }}</h3>
+              <!-- Team member job title -->
               <p class="text-primary small mb-2">{{ member.role }}</p>
+              <!-- Team member bio/description -->
               <p class="text-muted small mb-0">{{ member.bio }}</p>
             </div>
           </div>
@@ -189,68 +214,56 @@
       </div>
     </section>
 
-    {% comment %} <section class="mb-5">
-      <h2 class="h4 fw-bold mb-4">Frequently Asked Questions</h2>
-      <div class="accordion shadow-sm rounded overflow-hidden" id="aboutFaq">
-        {% for faq in faqs %}
-        <div class="accordion-item">
-          <h2 class="accordion-header">
-            <button
-              class="accordion-button {% if not forloop.first %}collapsed{% endif %}"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#faq{{ forloop.counter }}"
-            >
-              {{ faq.question }}
-            </button>
-          </h2>
-          <div
-            id="faq{{ forloop.counter }}"
-            class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
-            data-bs-parent="#aboutFaq"
-          >
-            <div class="accordion-body">{{ faq.answer }}</div>
-          </div>
-        </div>
-        {% endfor %}
-      </div>
-    </section> {% endcomment %}
+    <!-- COMMENTED FAQ SECTION: Frequently asked questions would appear here if uncommented -->
+    <!-- Accordion-style FAQ content could be added here for common user questions -->
 
+    <!-- FINAL CTA SECTION: Call-to-action encouraging user engagement -->
     <section class="text-center text-white rounded-4 p-5"
       style="background: linear-gradient(120deg, #0d6efd, #0ea5e9);">
+      <!-- CTA headline -->
       <h2 class="fw-bold mb-3">Ready to Find Your Next Home?</h2>
+      <!-- CTA description -->
       <p class="mb-4">Browse verified listings or publish your own rental in minutes.</p>
+      <!-- Browse properties button - main CTA -->
       <a href="{% url 'properties' %}" class="btn btn-light me-2 mb-2">Browse Properties</a>
+      <!-- Secondary CTA: Different actions for authenticated vs unauthenticated users -->
       {% if not user.is_authenticated %}
+      <!-- For new users: Signup button -->
       <a href="{% url 'register' %}" class="btn btn-outline-light mb-2">Get Started</a>
       {% else %}
+      <!-- For logged-in users: List property button -->
       <a href="{% url 'property' %}" class="btn btn-outline-light mb-2">List Your Property</a>
       {% endif %}
     </section>
   </div>
 </section>
 
+<!-- COUNTER ANIMATION SCRIPT: Animates statistics numbers when page loads -->
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+    // Get all elements marked with data-counter attribute (for animated numbers)
     const counterElements = document.querySelectorAll("[data-counter]");
 
     counterElements.forEach((element) => {
+      // Extract target number from data-counter attribute
       const rawValue = element.getAttribute("data-counter") || "0";
       const target = parseInt(rawValue.replace(/[^0-9]/g, ""), 10) || 0;
-      const hasPlus = rawValue.includes("+");
-      const duration = 1100;
-      const steps = 30;
-      const increment = target / steps;
+      const hasPlus = rawValue.includes("+"); // Check if number has a "+" suffix
+      const duration = 1100; // Animation duration in milliseconds
+      const steps = 30; // Number of animation steps
+      const increment = target / steps; // Amount to increment per step
       let current = 0;
       let tick = 0;
 
+      // Animate counter from 0 to target value
       const timer = setInterval(() => {
         tick += 1;
         current += increment;
         if (tick >= steps) {
           clearInterval(timer);
-          current = target;
+          current = target; // Ensure we end at exact target
         }
+        // Update element text with formatted number and optional "+" suffix
         element.textContent = Math.floor(current).toLocaleString() + (hasPlus ? "+" : "");
       }, duration / steps);
     });

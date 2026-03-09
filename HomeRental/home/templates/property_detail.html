@@ -2,15 +2,184 @@
 
 {% block title %}{{ property.title }}{% endblock %}
 
+{% block extra_head %}
+<style>
+    /* Smooth animations */
+    .property-detail-card {
+        animation: slideInUp 0.6s ease-out;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Image hover zoom */
+    .property-image-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 0.375rem 0.375rem 0 0;
+        cursor: zoom-in;
+        transition: all 0.3s ease;
+    }
+
+    .property-image-container img {
+        transition: transform 0.4s ease;
+        display: block;
+        width: 100%;
+    }
+
+    .property-image-container:hover img {
+        transform: scale(1.08);
+    }
+
+    /* Info card animations */
+    .info-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+
+    .info-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-left-color: #17a2b8;
+    }
+
+    /* Contact card special styling */
+    .contact-card {
+        background: linear-gradient(135deg, #e7f3f7 0%, #f0f9fb 100%);
+    }
+
+    .contact-item {
+        transition: all 0.3s ease;
+        padding: 0.75rem;
+        border-radius: 0.375rem;
+    }
+
+    .contact-item:hover {
+        background-color: rgba(255,255,255,0.7);
+    }
+
+    /* Button animations */
+    .btn {
+        transition: all 0.3s ease;
+    }
+
+    .btn-success:hover, .btn-warning:hover, .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    /* Fade in elements */
+    .fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+        opacity: 0;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Description section */
+    .description-box {
+        background-color: #f8f9fa;
+        border-left: 4px solid #17a2b8;
+        transition: all 0.3s ease;
+    }
+
+    .description-box:hover {
+        background-color: #f0f7f8;
+        border-left-color: #0c5460;
+    }
+
+    /* Header animation */
+    .property-header {
+        animation: slideDown 0.5s ease-out;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Copy button feedback */
+    .copy-btn {
+        position: relative;
+    }
+
+    .copy-feedback {
+        position: absolute;
+        background-color: #28a745;
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        top: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        pointer-events: none;
+        animation: popUp 0.5s ease-out forwards;
+    }
+
+    @keyframes popUp {
+        from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+
+    .zoom-icon {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: rgba(255,255,255,0.9);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .property-image-container:hover .zoom-icon {
+        opacity: 1;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <section class="container py-4 py-lg-5">
 
     <div class="row justify-content-center">
         <div class="col-lg-8">
 
-            <article class="card shadow-sm">
+            <article class="card shadow-sm property-detail-card">
 
-                <div class="card-header bg-info text-white py-3">
+                <div class="card-header bg-info text-white py-3 property-header">
                     <div class="d-flex align-items-center gap-2">
                         <i class="fas fa-building"></i>
                         <h1 class="h5 mb-0">{{ property.title }}</h1>
@@ -18,41 +187,54 @@
                 </div>
 
                 {% if property.image_url %}
-                <img src="{{ property.image_url }}" 
-                     class="card-img-top img-fluid" 
-                     style="max-height:320px;object-fit:cover;" 
-                     alt="{{ property.title }}">
+                <div class="property-image-container">
+                    <img src="{{ property.image_url }}" 
+                         class="card-img-top img-fluid" 
+                         style="max-height:320px;object-fit:cover;" 
+                         alt="{{ property.title }}"
+                         data-bs-toggle="modal"
+                         data-bs-target="#imageModal">
+                    <div class="zoom-icon">
+                        <i class="fas fa-search-plus text-info"></i>
+                    </div>
+                </div>
                 {% endif %}
 
                 <div class="card-body">
 
                     <div class="row g-3 mb-4">
 
-                        <div class="col-md-6">
-                            <p class="fw-semibold mb-1">
-                                <i class="fas fa-map-marker-alt text-info me-2"></i>Location
-                            </p>
-                            <p class="text-muted">{{ property.location }}</p>
+                        <div class="col-md-6 fade-in" style="animation-delay: 0.1s;">
+                            <div class="info-card p-3 rounded">
+                                <p class="fw-semibold mb-1">
+                                    <i class="fas fa-map-marker-alt text-info me-2"></i>Location
+                                </p>
+                                <p class="text-muted mb-0">{{ property.location }}</p>
+                            </div>
                         </div>
 
-                        <div class="col-md-6">
-                            <p class="fw-semibold mb-1">
-                                <i class="fas fa-home text-info me-2"></i>Type
-                            </p>
-                            <p class="text-muted">{{ property.property_type|title }}</p>
+                        <div class="col-md-6 fade-in" style="animation-delay: 0.2s;">
+                            <div class="info-card p-3 rounded">
+                                <p class="fw-semibold mb-1">
+                                    <i class="fas fa-home text-info me-2"></i>Type
+                                </p>
+                                <p class="text-muted mb-0">{{ property.property_type|title }}</p>
+                            </div>
                         </div>
 
-                        <div class="col-md-6">
-                            <p class="fw-semibold mb-1">
-                                <i class="fas fa-tag text-info me-2"></i>Price
-                            </p>
-                            <p class="text-muted">Rs. {{ property.price }}</p>
+                        <div class="col-md-6 fade-in" style="animation-delay: 0.3s;">
+                            <div class="info-card p-3 rounded">
+                                <p class="fw-semibold mb-1">
+                                    <i class="fas fa-tag text-info me-2"></i>Price
+                                </p>
+                                <p class="text-muted mb-0">Rs. {{ property.price }}</p>
+                            </div>
                         </div>
 
                         {% if property.contact_name or property.contact_phone or property.contact_email %}
-                        <div class="col-12">
+                        <div class="col-12 fade-in" style="animation-delay: 0.4s;">
 
-                            <div class="card border-info bg-light">
+                            <div class="card border-info bg-light contact-card">
                                 <div class="card-body">
 
                                     <h6 class="fw-bold mb-3">
@@ -61,15 +243,36 @@
                                     </h6>
 
                                     {% if property.contact_name %}
-                                    <p class="mb-1"><strong>Name:</strong> {{ property.contact_name }}</p>
+                                    <div class="contact-item">
+                                        <strong>Name:</strong> 
+                                        <span class="text-dark">{{ property.contact_name }}</span>
+                                        <button class="btn btn-sm btn-link copy-btn p-0 ms-2" 
+                                                onclick="copyToClipboard('{{ property.contact_name }}', this)">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
                                     {% endif %}
 
                                     {% if property.contact_phone %}
-                                    <p class="mb-1"><strong>Phone:</strong> {{ property.contact_phone }}</p>
+                                    <div class="contact-item">
+                                        <strong>Phone:</strong> 
+                                        <span class="text-dark">{{ property.contact_phone }}</span>
+                                        <button class="btn btn-sm btn-link copy-btn p-0 ms-2" 
+                                                onclick="copyToClipboard('{{ property.contact_phone }}', this)">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
                                     {% endif %}
 
                                     {% if property.contact_email %}
-                                    <p class="mb-0"><strong>Email:</strong> {{ property.contact_email }}</p>
+                                    <div class="contact-item">
+                                        <strong>Email:</strong> 
+                                        <span class="text-dark">{{ property.contact_email }}</span>
+                                        <button class="btn btn-sm btn-link copy-btn p-0 ms-2" 
+                                                onclick="copyToClipboard('{{ property.contact_email }}', this)">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
                                     {% endif %}
 
                                 </div>
@@ -80,15 +283,17 @@
 
                     </div>
 
-                    <div class="mb-4 border-bottom pb-3">
-                        <p class="fw-semibold mb-2">
-                            <i class="fas fa-align-left text-info me-2"></i>Description
-                        </p>
-                        <p class="text-secondary">{{ property.description }}</p>
+                    <div class="mb-4 border-bottom pb-3 fade-in" style="animation-delay: 0.5s;">
+                        <div class="description-box p-3 rounded">
+                            <p class="fw-semibold mb-2">
+                                <i class="fas fa-align-left text-info me-2"></i>Description
+                            </p>
+                            <p class="text-secondary mb-0">{{ property.description }}</p>
+                        </div>
                     </div>
 
 
-                    <div class="text-center">
+                    <div class="text-center fade-in" style="animation-delay: 0.6s;">
 
                         <p class="fw-semibold mb-3">
                             <i class="fas fa-map text-info me-2"></i>Map Location
@@ -97,24 +302,26 @@
                         {% if property.latitude and property.longitude %}
 
                         <div id="property-map"
-                             class="rounded-circle border shadow mx-auto"
-                             style="width:320px;height:320px;"></div>
+                             class="rounded border shadow mx-auto"
+                             style="width:100%;height:320px;cursor:grab;"></div>
 
                         <div class="d-flex justify-content-center gap-2 mt-3">
                             <button id="zoom-in-btn"
-                                    class="btn btn-outline-info btn-sm">
+                                    class="btn btn-outline-info btn-sm"
+                                    title="Zoom In">
                                 <i class="fas fa-plus"></i>
                             </button>
 
                             <button id="zoom-out-btn"
-                                    class="btn btn-outline-info btn-sm">
+                                    class="btn btn-outline-info btn-sm"
+                                    title="Zoom Out">
                                 <i class="fas fa-minus"></i>
                             </button>
                         </div>
 
                         {% else %}
 
-                        <div class="alert alert-info">
+                        <div class="alert alert-info fade-in">
                             <i class="fas fa-info-circle me-2"></i>
                             Owner has not set map coordinates for this property yet.
                         </div>
@@ -133,7 +340,7 @@
                         <form method="post"
                               action="{% url 'book_property' property.id %}">
                             {% csrf_token %}
-                            <button class="btn btn-success">
+                            <button class="btn btn-success" title="Click to book this property">
                                 <i class="fas fa-calendar-check me-2"></i>
                                 Book Now
                             </button>
@@ -141,7 +348,7 @@
                         <form method="post"
                               action="{% url 'toggle_favorite' property.id %}">
                             {% csrf_token %}
-                            <button type="submit" class="btn {% if is_favorited %}btn-warning{% else %}btn-outline-warning{% endif %}">
+                            <button type="submit" class="btn {% if is_favorited %}btn-warning{% else %}btn-outline-warning{% endif %}" title="Add to favorites">
                                 <i class="fas fa-heart me-2"></i>
                                 {% if is_favorited %}Saved{% else %}Save{% endif %}
                             </button>
@@ -150,12 +357,14 @@
                         {% elif not request.user.is_authenticated %}
 
                         <a href="{% url 'login' %}?next={% url 'property_detail' property.id %}"
-                           class="btn btn-primary">
+                           class="btn btn-primary"
+                           title="Login to book this property">
                             <i class="fas fa-sign-in-alt me-2"></i>
                             Login to Book
                         </a>
                         <a href="{% url 'login' %}?next={% url 'property_detail' property.id %}"
-                           class="btn btn-outline-warning">
+                           class="btn btn-outline-warning"
+                           title="Login to save favorites">
                             <i class="fas fa-heart me-2"></i>
                             Save
                         </a>
@@ -163,7 +372,8 @@
                         {% endif %}
 
                         <a href="{% url 'properties' %}"
-                           class="btn btn-outline-secondary">
+                           class="btn btn-outline-secondary"
+                           title="Go back to properties list">
                             <i class="fas fa-arrow-left me-2"></i>
                             Back to Properties
                         </a>
@@ -183,7 +393,7 @@
     <div class="row justify-content-center mt-4">
         <div class="col-lg-8">
 
-            <article class="card shadow-sm">
+            <article class="card shadow-sm property-detail-card">
 
                 <div class="card-header bg-primary text-white">
                     <h6 class="mb-0">
@@ -235,9 +445,97 @@
     {% endif %}
 
 </section>
+
+<!-- Image Modal -->
+{% if property.image_url %}
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">{{ property.title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="{{ property.image_url }}" 
+                     class="img-fluid rounded" 
+                     alt="{{ property.title }}"
+                     style="max-height: 600px;">
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}
 
 {% block extra_scripts %}
+<script>
+    // Copy to clipboard function with visual feedback
+    function copyToClipboard(text, button) {
+        navigator.clipboard.writeText(text).then(function() {
+            // Show feedback
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check text-success"></i>';
+            
+            // Create popup message
+            const popup = document.createElement('div');
+            popup.className = 'copy-feedback';
+            popup.textContent = 'Copied!';
+            button.parentElement.style.position = 'relative';
+            button.parentElement.appendChild(popup);
+            
+            // Reset after 2 seconds
+            setTimeout(function() {
+                button.innerHTML = originalHTML;
+                popup.remove();
+            }, 2000);
+        }).catch(function(err) {
+            console.error('Failed to copy:', err);
+            alert('Failed to copy to clipboard');
+        });
+    }
+
+    // Smooth scrolling for internal links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({behavior: 'smooth'});
+            }
+        });
+    });
+
+    // Add hover animation to tenant list items
+    document.querySelectorAll('.list-group-item').forEach(item => {
+        item.style.transition = 'all 0.3s ease';
+        item.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = '#f8f9fa';
+            this.style.paddingLeft = '1.5rem';
+        });
+        item.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = 'transparent';
+            this.style.paddingLeft = '0';
+        });
+    });
+
+    // Intersection Observer for fade-in animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
 {% if property.latitude and property.longitude %}
 <script>
 var lat = {{ property.latitude }};

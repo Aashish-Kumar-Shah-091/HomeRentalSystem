@@ -1,324 +1,364 @@
 {% load static %}
+<!--
+  Template: Base Layout (layout.html)
+  Purpose: Main Django template that wraps all pages with consistent header, navigation, and footer
+  Features: Responsive navbar with notifications dropdown, user auth menu, footer links
+  Components: Bootstrap navbar (fixed-top), notification bell with unread count, user profile dropdown
+  Used By: Extended by all page templates (index.html, property_list.html, property_detail.html, etc.)
+  Responsive: Mobile-friendly with hamburger menu toggle on small screens
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Meta tags and page meta information -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- Dynamic page title block - overridden by child templates -->
 <title>{% block title %}Ghar Setu{% endblock %}</title>
 
+<!-- Bootstrap 5.3.8 CSS framework for responsive layout and components -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 
+<!-- Font Awesome 6.7.2 icon library for UI icons throughout the site -->
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
+<!-- Leaflet.js for interactive map displays (property location, property search) -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
+<!-- Block for page-specific CSS styles (filled by child templates) -->
 {% block extra_head %}{% endblock %}
 </head>
 
-
 <body class="bg-light d-flex flex-column min-vh-100">
 
-<!-- NAVBAR -->
+<!-- NAVIGATION BAR: Fixed top navbar with site branding, main navigation, and user controls -->
 <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom fixed-top">
 <div class="container">
 
-<a class="navbar-brand fw-bold" href="{% url 'home_list' %}">
-<i class="fas fa-house me-1"></i>
-Ghar Setu
-</a>
+  <!-- Brand/Logo: Links to homepage -->
+  <a class="navbar-brand fw-bold" href="{% url 'home_list' %}">
+    <i class="fas fa-house me-1"></i>
+    Ghar Setu
+  </a>
 
-<button class="navbar-toggler"
-type="button"
-data-bs-toggle="collapse"
-data-bs-target="#navbarMain">
-<span class="navbar-toggler-icon"></span>
-</button>
+  <!-- Mobile hamburger menu toggle button -->
+  <button class="navbar-toggler"
+  type="button"
+  data-bs-toggle="collapse"
+  data-bs-target="#navbarMain">
+    <span class="navbar-toggler-icon"></span>
+  </button>
 
-<div class="collapse navbar-collapse" id="navbarMain">
+  <!-- Main navigation menu (collapsed on mobile) -->
+  <div class="collapse navbar-collapse" id="navbarMain">
 
-<ul class="navbar-nav mx-auto">
+    <!-- Center navigation links: Home, Properties, About, Contact -->
+    <ul class="navbar-nav mx-auto">
 
-<li class="nav-item">
-<a class="nav-link" href="{% url 'home_list' %}">Home</a>
-</li>
+      <!-- Home link - goes to main page -->
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'home_list' %}">Home</a>
+      </li>
 
-<li class="nav-item">
-<a class="nav-link" href="{% url 'properties' %}">Properties</a>
-</li>
+      <!-- Properties link - browse all listings -->
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'properties' %}">Properties</a>
+      </li>
 
-<li class="nav-item">
-<a class="nav-link" href="{% url 'about' %}">About</a>
-</li>
+      <!-- About page link -->
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'about' %}">About</a>
+      </li>
 
-<li class="nav-item">
-<a class="nav-link" href="{% url 'help' %}">Contact</a>
-</li>
+      <!-- Help/Contact page link -->
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'help' %}">Contact</a>
+      </li>
 
-</ul>
+    </ul>
 
+    <!-- Right-aligned navbar items: Notifications (for authenticated users) and User menu -->
+    <ul class="navbar-nav ms-auto align-items-center">
 
-<ul class="navbar-nav ms-auto align-items-center">
+      {% if request.user.is_authenticated %}
 
-{% if request.user.is_authenticated %}
+      <!-- NOTIFICATIONS DROPDOWN: Shows recent booking notifications -->
+      <li class="nav-item dropdown me-2">
 
-<!-- NOTIFICATIONS -->
-<li class="nav-item dropdown me-2">
+        <!-- Bell icon with unread notification count badge -->
+        <a class="nav-link position-relative"
+        data-bs-toggle="dropdown"
+        href="#">
+          <i class="fas fa-bell"></i>
+          
+          <!-- Red badge showing number of unread notifications -->
+          {% if unread_notifications_count > 0 %}
+          <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">
+            {{ unread_notifications_count }}
+          </span>
+          {% endif %}
+        </a>
 
-<a class="nav-link position-relative"
-data-bs-toggle="dropdown"
-href="#">
+        <!-- Dropdown menu with recent notifications -->
+        <ul class="dropdown-menu dropdown-menu-end shadow">
 
-<i class="fas fa-bell"></i>
+          <!-- Dropdown header with title and mark all button -->
+          <li class="dropdown-header d-flex justify-content-between">
+            <span>Notifications</span>
+            
+            <!-- Mark all notifications as read button -->
+            {% if recent_notifications %}
+            <form method="post" action="{% url 'mark_all_notifications_read' %}">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-link">Mark all</button>
+            </form>
+            {% endif %}
+          </li>
 
-{% if unread_notifications_count > 0 %}
-<span class="badge bg-danger position-absolute top-0 start-100 translate-middle">
-{{ unread_notifications_count }}
-</span>
-{% endif %}
+          <!-- Loop through most recent notifications (populated by context_processors.py) -->
+          {% for notification in recent_notifications %}
 
-</a>
+          <!-- Individual notification item - links to notification details -->
+          <li>
+            <a class="dropdown-item {% if not notification.is_read %}fw-bold{% endif %}"
+            href="{{ notification.url }}">
+              {{ notification.message }} <br>
+              <!-- Timestamp of notification -->
+              <small class="text-muted">
+                {{ notification.created_at|date:"M d, Y H:i" }}
+              </small>
+            </a>
+          </li>
 
-<ul class="dropdown-menu dropdown-menu-end shadow">
+          {% empty %}
 
-<li class="dropdown-header d-flex justify-content-between">
+          <!-- Empty state when no notifications -->
+          <li>
+            <span class="dropdown-item-text text-muted">
+              No notifications
+            </span>
+          </li>
 
-<span>Notifications</span>
+          {% endfor %}
 
-{% if recent_notifications %}
-<form method="post" action="{% url 'mark_all_notifications_read' %}">
-{% csrf_token %}
-<button class="btn btn-sm btn-link">Mark all</button>
-</form>
-{% endif %}
+          <!-- Divider separator -->
+          <li><hr class="dropdown-divider"></li>
 
-</li>
+          <!-- View all notifications link - goes to notifications page -->
+          <li>
+            <a class="dropdown-item text-center"
+            href="{% url 'notifications' %}">
+              View all
+            </a>
+          </li>
 
-{% for notification in recent_notifications %}
+        </ul>
+      </li>
 
-<li>
-<a class="dropdown-item {% if not notification.is_read %}fw-bold{% endif %}"
-href="{{ notification.url }}">
-{{ notification.message }} <br>
-<small class="text-muted">
-{{ notification.created_at|date:"M d, Y H:i" }}
-</small>
-</a>
-</li>
+      {% endif %}
 
-{% empty %}
+      <!-- USER MENU DROPDOWN: Profile, saved properties, logout/login/register -->
+      <li class="nav-item dropdown">
 
-<li>
-<span class="dropdown-item-text text-muted">
-No notifications
-</span>
-</li>
+        <!-- User icon trigger for dropdown -->
+        <a class="nav-link dropdown-toggle"
+        data-bs-toggle="dropdown"
+        href="#">
+          <i class="fas fa-user-circle"></i>
+        </a>
 
-{% endfor %}
+        <!-- Dropdown menu with authenticated and unauthenticated options -->
+        <ul class="dropdown-menu dropdown-menu-end shadow">
 
-<li><hr class="dropdown-divider"></li>
+          {% if user.is_authenticated %}
 
-<li>
-<a class="dropdown-item text-center"
-href="{% url 'notifications' %}">
-View all
-</a>
-</li>
+          <!-- User info header: Shows username and email -->
+          <li class="px-3 py-2">
+            <strong>{{ user.username }}</strong><br>
+            <small class="text-muted">{{ user.email }}</small>
+          </li>
 
-</ul>
-</li>
+          <!-- Divider between header and menu items -->
+          <li><hr class="dropdown-divider"></li>
 
-{% endif %}
+          <!-- Profile page link - edit user profile -->
+          <li>
+            <a class="dropdown-item" href="{% url 'profile' %}">
+              Profile
+            </a>
+          </li>
 
+          <!-- Saved properties link - view favorite properties -->
+          <li>
+            <a class="dropdown-item" href="{% url 'favorite_list' %}">
+              Saved Properties
+            </a>
+          </li>
 
+          <!-- Logout button - POST form to logout -->
+          <li>
+            <form method="post" action="{% url 'logout' %}" class="px-3">
+              {% csrf_token %}
+              <button class="btn btn-outline-danger btn-sm w-100">
+                Logout
+              </button>
+            </form>
+          </li>
 
-<!-- USER MENU -->
-<li class="nav-item dropdown">
+          {% else %}
 
-<a class="nav-link dropdown-toggle"
-data-bs-toggle="dropdown"
-href="#">
+          <!-- Login link for unauthenticated users -->
+          <li>
+            <a class="dropdown-item" href="{% url 'login' %}">
+              Login
+            </a>
+          </li>
 
-<i class="fas fa-user-circle"></i>
+          <!-- Register link for new users -->
+          <li>
+            <a class="dropdown-item" href="{% url 'register' %}">
+              Register
+            </a>
+          </li>
 
-</a>
+          {% endif %}
 
-<ul class="dropdown-menu dropdown-menu-end shadow">
+        </ul>
 
-{% if user.is_authenticated %}
+      </li>
 
-<li class="px-3 py-2">
-<strong>{{ user.username }}</strong><br>
-<small class="text-muted">{{ user.email }}</small>
-</li>
+    </ul>
 
-<li><hr class="dropdown-divider"></li>
-
-<li>
-<a class="dropdown-item" href="{% url 'profile' %}">
-Profile
-</a>
-</li>
-
-<li>
-<a class="dropdown-item" href="{% url 'favorite_list' %}">
-Saved Properties
-</a>
-</li>
-
-<li>
-
-<form method="post" action="{% url 'logout' %}" class="px-3">
-{% csrf_token %}
-<button class="btn btn-outline-danger btn-sm w-100">
-Logout
-</button>
-</form>
-
-</li>
-
-{% else %}
-
-<li>
-<a class="dropdown-item" href="{% url 'login' %}">
-Login
-</a>
-</li>
-
-<li>
-<a class="dropdown-item" href="{% url 'register' %}">
-Register
-</a>
-</li>
-
-{% endif %}
-
-</ul>
-
-</li>
-
-</ul>
-
-</div>
+  </div>
 </div>
 </nav>
 
-
+<!-- Spacer div: Compensates for fixed navbar (approximately 70px height) -->
 <div style="height:70px;"></div>
 
-
+<!-- Optional hero section block for pages that need one (e.g., homepage) -->
 {% block hero %}{% endblock %}
 
-
+<!-- Main content area: Grows to fill available space if footer is short -->
 <main class="flex-grow-1">
-{% block content %}{% endblock %}
+  {% block content %}{% endblock %}
 </main>
-
-
-
-<!-- FOOTER -->
-
+<!-- FOOTER: Site footer with links, company info, and contact details -->
 <footer class="bg-white border-top mt-5">
 
 <div class="container py-5">
 
 <div class="row g-4">
 
+  <!-- Footer Column 1: About company info -->
+  <div class="col-md-3">
+    <h6 class="fw-bold">About</h6>
+    <!-- Company description and project details -->
+    <p class="small text-muted">
+      Ghar Setu <br>
+      SYP Project 2026 <br>
+      Automated Rental Solution
+    </p>
+  </div>
 
-<div class="col-md-3">
-<h6 class="fw-bold">About</h6>
-<p class="small text-muted">
-Ghar Setu <br>
-SYP Project 2026 <br>
-Automated Rental Solution
-</p>
+  <!-- Footer Column 2: Quick navigation links -->
+  <div class="col-md-3">
+    <h6 class="fw-bold">Quick Links</h6>
+
+    <!-- Link to browse all properties -->
+    <a class="d-block small text-muted"
+    href="{% url 'properties' %}">
+      Browse Properties
+    </a>
+
+    <!-- Link to list a new property (for owners) -->
+    <a class="d-block small text-muted"
+    href="{% url 'property' %}">
+      List Property
+    </a>
+
+    <!-- Login link for existing users -->
+    <a class="d-block small text-muted"
+    href="{% url 'login' %}">
+      Login
+    </a>
+
+    <!-- Registration link for new users -->
+    <a class="d-block small text-muted"
+    href="{% url 'register' %}">
+      Register
+    </a>
+
+  </div>
+
+  <!-- Footer Column 3: Support and legal links -->
+  <div class="col-md-3">
+
+    <h6 class="fw-bold">Support</h6>
+
+    <!-- Help center link -->
+    <a class="d-block small text-muted" href="#">Help Center</a>
+    <!-- Contact page link -->
+    <a class="d-block small text-muted" href="#">Contact</a>
+    <!-- Privacy policy link -->
+    <a class="d-block small text-muted" href="#">Privacy</a>
+    <!-- Terms of service link -->
+    <a class="d-block small text-muted" href="#">Terms</a>
+
+  </div>
+
+  <!-- Footer Column 4: Contact information and social media -->
+  <div class="col-md-3">
+
+    <h6 class="fw-bold">Contact</h6>
+
+    <!-- Company email address -->
+    <p class="small text-muted mb-1">
+      info@homerental.com
+    </p>
+
+    <!-- Company phone number -->
+    <p class="small text-muted mb-1">
+      025-581234
+    </p>
+
+    <!-- Company location/country -->
+    <p class="small text-muted">
+      Nepal
+    </p>
+
+    <!-- Social media links with Font Awesome icons -->
+    <div class="mt-2">
+      <!-- Facebook link -->
+      <i class="fab fa-facebook me-2"></i>
+      <!-- Twitter link -->
+      <i class="fab fa-twitter me-2"></i>
+      <!-- Instagram link -->
+      <i class="fab fa-instagram me-2"></i>
+      <!-- LinkedIn link -->
+      <i class="fab fa-linkedin"></i>
+    </div>
+
+  </div>
+
 </div>
 
-
-<div class="col-md-3">
-<h6 class="fw-bold">Quick Links</h6>
-
-<a class="d-block small text-muted"
-href="{% url 'properties' %}">
-Browse Properties
-</a>
-
-<a class="d-block small text-muted"
-href="{% url 'property' %}">
-List Property
-</a>
-
-<a class="d-block small text-muted"
-href="{% url 'login' %}">
-Login
-</a>
-
-<a class="d-block small text-muted"
-href="{% url 'register' %}">
-Register
-</a>
-
 </div>
 
-
-<div class="col-md-3">
-
-<h6 class="fw-bold">Support</h6>
-
-<a class="d-block small text-muted" href="#">Help Center</a>
-<a class="d-block small text-muted" href="#">Contact</a>
-<a class="d-block small text-muted" href="#">Privacy</a>
-<a class="d-block small text-muted" href="#">Terms</a>
-
-</div>
-
-
-<div class="col-md-3">
-
-<h6 class="fw-bold">Contact</h6>
-
-<p class="small text-muted mb-1">
-info@homerental.com
-</p>
-
-<p class="small text-muted mb-1">
-025-581234
-</p>
-
-<p class="small text-muted">
-Nepal
-</p>
-
-<div class="mt-2">
-
-<i class="fab fa-facebook me-2"></i>
-<i class="fab fa-twitter me-2"></i>
-<i class="fab fa-instagram me-2"></i>
-<i class="fab fa-linkedin"></i>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-
-
+<!-- Footer bottom: Copyright notice -->
 <div class="text-center border-top py-3 small text-muted">
-
-© 2026 Ghar Setu. All rights reserved.
-
+  © 2026 Ghar Setu. All rights reserved.
 </div>
 
 </footer>
 
-
-
+<!-- Bootstrap 5 JavaScript bundle for interactive components (modals, dropdowns, etc.) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Block for page-specific JavaScript (filled by child templates) -->
 {% block extra_scripts %}{% endblock %}
 
 </body>

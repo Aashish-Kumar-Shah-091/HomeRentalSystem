@@ -1,12 +1,19 @@
 
 {% extends "layout.html" %}
 
+<!-- Template: Homepage (Index) - Ghar Setu
+     Purpose: Landing page showcasing the home rental platform with hero section, services, benefits, and testimonials
+     Features: Animated hero banner with CTA, service overview cards, why-choose cards, testimonials carousel, review submission link
+     For: New and existing users to discover platform capabilities and user testimonials
+     Responsive: Fully responsive with mobile, tablet, and desktop breakpoints; RTL safety; accessibility support
+-->
 
 {% block title %}
 Ghar Setu
 {% endblock %}
 
 {% block extra_head %}
+<!-- Page-specific styles for hero, service cards, testimonials, and animations -->
 <style>
   .home-hero {
     position: relative;
@@ -377,30 +384,46 @@ Ghar Setu
 {% endblock %}
 
 {% block content %}
+<!-- Main homepage content with hero, services, benefits, and testimonials -->
+
+<!-- HERO SECTION: Landing banner with platform tagline and primary CTA -->
 <section class="container py-4 py-lg-5">
+  <!-- Hero banner: animated gradient background with property image -->
   <div class="home-hero shadow-sm">
+    <!-- Hero content container with animated text entrance -->
     <div class="home-hero-content">
+      <!-- Tagline: Platform branding -->
       <p class="hero-tagline reveal is-visible">Ghar Setu Rental Platform</p>
+      
+      <!-- Main headline: Value proposition -->
       <h1 class="hero-title reveal is-visible reveal-delay-1">Trusted spaces for living, renting, and growing</h1>
+      
+      <!-- Subheading: Features and benefits summary -->
       <p class="hero-subtext reveal is-visible reveal-delay-2">
         Browse homes, rooms, and apartments with clear details and direct owner contact.
         Post your property in minutes and connect with verified tenants.
       </p>
+      
+      <!-- Primary CTA button with icon animation on hover -->
       <a class="hero-nav-btn reveal is-visible reveal-delay-3" href="{% url 'properties' %}">
         Dream Spaces
         <i class="fa-solid fa-arrow-right"></i>
       </a>
-
     </div>
   </div>
 </section>
 
+<!-- SERVICES SECTION: Overview of three main platform features (Buy, Rent, List) -->
 <section class="container home-services">
+  <!-- Section header with title and description -->
   <div class="text-center mb-4 mb-lg-5 reveal">
     <h2 class="fw-bold mb-2">How We Help You</h2>
     <p class="text-muted mb-0">Everything you need to buy, rent, or list a property in one place.</p>
   </div>
+  
+  <!-- Service cards container with responsive grid -->
   <div class="home-services-stage mb-4 mb-lg-5 reveal">
+    <!-- Banner image showing rental lifestyle -->
     <img
       class="service-section-banner"
       src="https://kajabi-storefronts-production.kajabi-cdn.com/kajabi-storefronts-production/file-uploads/blogs/6976/images/0e6a64-b732-f51-c866-32d17c43b_5_Short_Term_Rental_Design_Tips_from_Top-Rated_Airbnb_Hosts.jpg"
@@ -408,32 +431,42 @@ Ghar Setu
       loading="lazy"
       referrerpolicy="no-referrer"
     >
+    
+    <!-- Overlay grid with three service cards positioned at bottom of image -->
     <div class="service-overlay-grid">
       <div class="row g-4">
+        <!-- Service Card 1: Buy a Home -->
         <div class="col-12 col-lg-4">
           <article class="service-card p-4 p-lg-5 text-center reveal reveal-delay-1">
             <h2 class="service-title">Buy a Home</h2>
             <p class="service-copy">
               Compare neighborhood options, understand real costs, and move forward with confidence.
             </p>
+            <!-- CTA button to property listings -->
             <a class="btn btn-outline-primary service-btn" href="{% url 'properties' %}">Explore Listings</a>
           </article>
         </div>
+        
+        <!-- Service Card 2: Rent a Home -->
         <div class="col-12 col-lg-4">
           <article class="service-card p-4 p-lg-5 text-center reveal reveal-delay-2">
             <h2 class="service-title">Rent a Home</h2>
             <p class="service-copy">
               Discover verified rental spaces and connect with owners through a smooth digital flow.
             </p>
+            <!-- CTA button to view rental properties -->
             <a class="btn btn-outline-primary service-btn" href="{% url 'properties' %}">Find Rentals</a>
           </article>
         </div>
+        
+        <!-- Service Card 3: List a Home -->
         <div class="col-12 col-lg-4">
           <article class="service-card p-4 p-lg-5 text-center reveal reveal-delay-3">
             <h2 class="service-title">List a Home</h2>
             <p class="service-copy">
               Post your property quickly, highlight key details, and receive booking interest faster.
             </p>
+            <!-- CTA button for property owners to list -->
             <a class="btn btn-outline-primary service-btn" href="{% url 'property' %}">See Your Options</a>
           </article>
         </div>
@@ -442,14 +475,20 @@ Ghar Setu
   </div>
 </section>
 
+<!-- WHY CHOOSE US SECTION: Key platform benefits with icon cards -->
 <section class="container why-choose">
+  <!-- Section header with title and description -->
   <div class="text-center mb-4 mb-lg-5 reveal">
     <h2 class="fw-bold mb-2">Why Choose Us</h2>
     <p class="text-muted mb-0">Built to make renting safer, simpler, and faster for everyone.</p>
   </div>
+  
+  <!-- Four benefit cards in responsive grid (4 columns on desktop, 2 on tablet, 1 on mobile) -->
   <div class="row g-3 g-lg-4">
+    <!-- Benefit Card 1: Verified Listings -->
     <div class="col-12 col-sm-6 col-lg-3">
       <article class="why-card reveal reveal-delay-1">
+        <!-- Icon image: verification/listings -->
         <div class="why-icon">
           <img class="why-icon-img" src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=120&q=80" alt="Verified listings">
         </div>
@@ -457,8 +496,11 @@ Ghar Setu
         <p class="why-copy">Review trusted property details with better listing quality and fewer surprises.</p>
       </article>
     </div>
+    
+    <!-- Benefit Card 2: Secure Communication -->
     <div class="col-12 col-sm-6 col-lg-3">
       <article class="why-card reveal reveal-delay-2">
+        <!-- Icon image: secure communication -->
         <div class="why-icon">
           <img class="why-icon-img" src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=120&q=80" alt="Secure communication">
         </div>
@@ -466,8 +508,11 @@ Ghar Setu
         <p class="why-copy">Connect through a platform designed for safer interactions between owners and tenants.</p>
       </article>
     </div>
+    
+    <!-- Benefit Card 3: Direct Owner Contact -->
     <div class="col-12 col-sm-6 col-lg-3">
       <article class="why-card reveal reveal-delay-3">
+        <!-- Icon image: direct contact -->
         <div class="why-icon">
           <img class="why-icon-img" src="https://images.unsplash.com/photo-1521790797524-b2497295b8a0?auto=format&fit=crop&w=120&q=80" alt="Direct owner contact">
         </div>
@@ -475,8 +520,11 @@ Ghar Setu
         <p class="why-copy">Speak directly with property owners to clarify details and decide with confidence.</p>
       </article>
     </div>
+    
+    <!-- Benefit Card 4: Fast Booking -->
     <div class="col-12 col-sm-6 col-lg-3">
       <article class="why-card reveal">
+        <!-- Icon image: fast/quick process -->
         <div class="why-icon">
           <img class="why-icon-img" src="https://images.unsplash.com/photo-1556155092-490a1ba16284?auto=format&fit=crop&w=120&q=80" alt="Fast booking">
         </div>
@@ -487,33 +535,54 @@ Ghar Setu
   </div>
 </section>
 
+<!-- TESTIMONIALS SECTION: User reviews and ratings showcase -->
 <section class="container testimonials">
+  <!-- Section header with title and description -->
   <div class="text-center mb-4 mb-lg-5 reveal">
     <h2 class="fw-bold mb-2">Ratings & Reviews</h2>
     <p class="text-muted mb-0">What renters and owners say about using our platform.</p>
   </div>
+  
+  <!-- Call-to-action box: Encourage user reviews -->
   <div class="testimonial-form-wrap reveal mb-4 mb-lg-5">
     <h3 class="h5 mb-2">Want to share your experience?</h3>
     <p class="text-muted mb-3">Click below to rate us on a dedicated reviews page.</p>
+    <!-- Button to reviews page where users can submit testimonials -->
     <a class="btn btn-primary" href="{% url 'reviews' %}">Rate Us</a>
   </div>
+  
+  <!-- Testimonial cards grid: Display user reviews with ratings -->
   <div class="row g-3 g-lg-4">
     {% for testimonial in testimonials %}
+      <!-- Individual testimonial card with rating stars -->
       <div class="col-12 col-md-6 col-lg-4">
         <article class="testimonial-card reveal">
+          <!-- Star rating display: Shows 1-5 filled/empty stars based on testimonial.rating -->
           <div class="testimonial-rating" aria-label="{{ testimonial.rating }} out of 5 stars">
+            <!-- Star 1 -->
             <i class="{% if testimonial.rating >= 1 %}fa-solid{% else %}fa-regular{% endif %} fa-star"></i>
+            <!-- Star 2 -->
             <i class="{% if testimonial.rating >= 2 %}fa-solid{% else %}fa-regular{% endif %} fa-star"></i>
+            <!-- Star 3 -->
             <i class="{% if testimonial.rating >= 3 %}fa-solid{% else %}fa-regular{% endif %} fa-star"></i>
+            <!-- Star 4 -->
             <i class="{% if testimonial.rating >= 4 %}fa-solid{% else %}fa-regular{% endif %} fa-star"></i>
+            <!-- Star 5 -->
             <i class="{% if testimonial.rating >= 5 %}fa-solid{% else %}fa-regular{% endif %} fa-star"></i>
           </div>
+          
+          <!-- Testimonial text/message content -->
           <p class="testimonial-text mb-3">{{ testimonial.message }}</p>
+          
+          <!-- Author username -->
           <p class="testimonial-user">{{ testimonial.user.username }}</p>
+          
+          <!-- User role (e.g., "Tenant", "Property Owner") -->
           <p class="testimonial-meta">{{ testimonial.get_role_display }}</p>
         </article>
       </div>
     {% empty %}
+      <!-- Empty state: Show when no testimonials exist -->
       <div class="col-12">
         <div class="testimonial-empty reveal">
           No testimonials yet. Be the first to share your experience.
@@ -522,28 +591,38 @@ Ghar Setu
     {% endfor %}
   </div>
 </section>
+
+<!-- INTERSECTION OBSERVER SCRIPT: Handles scroll-triggered animations for reveal elements -->
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+    // Get all elements with reveal class that haven't been revealed yet
     const revealItems = document.querySelectorAll(".reveal:not(.is-visible)");
+    
+    // Fallback for browsers without IntersectionObserver support or if no items to reveal
     if (!("IntersectionObserver" in window) || revealItems.length === 0) {
+      // Add is-visible class to all items immediately
       revealItems.forEach(function (el) {
         el.classList.add("is-visible");
       });
       return;
     }
 
+    // Create observer for scroll-triggered animations
     const observer = new IntersectionObserver(
       function (entries) {
         entries.forEach(function (entry) {
+          // When element enters viewport, add is-visible class to trigger animation
           if (entry.isIntersecting) {
             entry.target.classList.add("is-visible");
+            // Stop observing this element after it's revealed
             observer.unobserve(entry.target);
           }
         });
       },
-      { threshold: 0.2 }
+      { threshold: 0.2 } // Trigger when 20% of element is visible
     );
 
+    // Observe all reveal items
     revealItems.forEach(function (el) {
       observer.observe(el);
     });

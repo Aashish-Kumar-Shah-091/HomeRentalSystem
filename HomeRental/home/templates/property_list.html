@@ -5,19 +5,209 @@
 {% block extra_head %}
 <style>
 
-/* card hover */
-.property-card{
-transition: transform .2s ease, box-shadow .2s ease;
+/* Enhanced card hover animations */
+.property-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
 }
 
-.property-card:hover{
-transform: translateY(-5px);
-box-shadow:0 10px 20px rgba(0,0,0,.12);
+.property-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(255,255,255,0), rgba(255,255,255,0.3), rgba(255,255,255,0));
+    transition: left 0.5s ease;
+    z-index: 1;
+    pointer-events: none;
 }
 
-.property-img{
-height:190px;
-object-fit:cover;
+.property-card:hover::before {
+    left: 100%;
+}
+
+.property-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+.property-img {
+    height: 190px;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+    position: relative;
+}
+
+.property-card:hover .property-img {
+    transform: scale(1.1);
+}
+
+/* Image overlay effect */
+.property-img-container {
+    position: relative;
+    overflow: hidden;
+    background-color: #f0f0f0;
+}
+
+.price-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    animation: slidein 0.5s ease-out;
+}
+
+@keyframes slidein {
+    from {
+        transform: translateX(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Info animations */
+.property-info-item {
+    transition: all 0.3s ease;
+    padding: 0.25rem 0;
+}
+
+.property-card:hover .property-info-item {
+    transform: translateX(3px);
+}
+
+/* Button animations */
+.property-card .btn {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.property-card .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Container animations */
+.property-grid {
+    animation: fadeInGrid 0.6s ease-out;
+}
+
+@keyframes fadeInGrid {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.property-item {
+    animation: fadeInUp 0.5s ease-out both;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.col-12.col-md-6.col-lg-3:nth-child(1) .property-item { animation-delay: 0.1s; }
+.col-12.col-md-6.col-lg-3:nth-child(2) .property-item { animation-delay: 0.15s; }
+.col-12.col-md-6.col-lg-3:nth-child(3) .property-item { animation-delay: 0.2s; }
+.col-12.col-md-6.col-lg-3:nth-child(4) .property-item { animation-delay: 0.25s; }
+
+/* Header animations */
+.page-header {
+    animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Filter animations */
+.filter-section {
+    transition: all 0.3s ease;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 1rem;
+    align-items: center;
+}
+
+.filter-section form {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.form-select {
+    transition: all 0.3s ease;
+    min-width: 180px;
+    border: 2px solid #e0e0e0;
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.875rem;
+    font-size: 0.95rem;
+    background-color: #fff;
+}
+
+.form-select:hover {
+    border-color: #17a2b8;
+    box-shadow: 0 2px 8px rgba(23, 162, 184, 0.1);
+}
+
+.form-select:focus {
+    border-color: #17a2b8;
+    box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+    outline: none;
+}
+
+/* Empty state animation */
+.empty-state {
+    animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Add property button animation */
+.add-property-btn {
+    transition: all 0.3s ease;
+}
+
+.add-property-btn:hover {
+    transform: translate(2px, -2px);
+    box-shadow: 0 6px 16px rgba(40, 167, 69, 0.3);
 }
 
 </style>
@@ -31,7 +221,7 @@ object-fit:cover;
 
 <!-- HEADER -->
 
-<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4 page-header">
 
 <div>
 
@@ -50,13 +240,14 @@ Find your perfect rental home
 
 <!-- FILTERS -->
 
-<div class="d-flex flex-wrap gap-2 align-items-center">
+<div class="d-flex flex-wrap gap-2 align-items-center filter-section">
 
-<form method="GET" class="d-flex flex-wrap gap-2">
+<form method="GET" class="d-flex flex-wrap gap-2 align-items-center">
 
 <select name="location"
 onchange="this.form.submit()"
-class="form-select form-select-sm">
+class="form-select form-select-sm"
+title="Filter by location">
 
 <option value=""> All Locations</option>
 
@@ -74,7 +265,8 @@ class="form-select form-select-sm">
 
 <select name="sort"
 onchange="this.form.submit()"
-class="form-select form-select-sm">
+class="form-select form-select-sm"
+title="Sort by price">
 
 <option value=""> Price</option>
 
@@ -95,8 +287,9 @@ High → Low
 
 {% if user.is_authenticated %}
 
-<a class="btn btn-success btn-sm"
-href="{% url 'property' %}">
+<a class="btn btn-success btn-sm add-property-btn"
+href="{% url 'property' %}"
+title="Add a new property listing">
 
 <i class="fas fa-plus me-1"></i>
 New Property
@@ -113,26 +306,33 @@ New Property
 
 <!-- PROPERTY GRID -->
 
-<div class="row g-4">
+<div class="row g-4 property-grid">
 
 {% for property in properties %}
 
 <div class="col-12 col-md-6 col-lg-3">
 
-<div class="card property-card h-100 shadow-sm">
+<div class="card property-card h-100 shadow-sm property-item">
 
 {% if property.image %}
 
-<img src="{{ property.image.url }}"
-class="card-img-top property-img"
-alt="{{ property.title }}">
+<div class="property-img-container">
+    <img src="{{ property.image.url }}"
+    class="card-img-top property-img"
+    alt="{{ property.title }}"
+    title="Click to view details">
+    
+    <span class="price-badge">
+        <i class="fas fa-tag me-1"></i>Rs. {{ property.price }}
+    </span>
+</div>
 
 {% endif %}
 
 
 <div class="card-body d-flex flex-column">
 
-<h2 class="h6 fw-bold mb-2">
+<h2 class="h6 fw-bold mb-2 property-info-item">
 
 <i class="fas fa-building text-info me-1"></i>
 
@@ -141,7 +341,7 @@ alt="{{ property.title }}">
 </h2>
 
 
-<p class="small mb-1">
+<p class="small mb-1 property-info-item">
 
 <i class="fas fa-map-marker-alt text-info me-1"></i>
 
@@ -149,8 +349,7 @@ alt="{{ property.title }}">
 
 </p>
 
-
-<p class="small mb-1">
+<p class="small mb-1 property-info-item">
 
 <i class="fas fa-door-open text-info me-1"></i>
 
@@ -159,16 +358,7 @@ alt="{{ property.title }}">
 </p>
 
 
-<p class="fw-semibold text-success mb-2">
-
-<i class="fas fa-tag me-1"></i>
-
-{{ property.price }}
-
-</p>
-
-
-<p class="text-muted small mb-3">
+<p class="text-muted small mb-3 property-info-item">
 
 {{ property.description|truncatewords:14 }}
 
@@ -181,7 +371,8 @@ alt="{{ property.title }}">
 {% if request.user != property.user %}
 
 <a class="btn btn-primary btn-sm"
-href="{% url 'property_detail' property.id %}?view=compact">
+href="{% url 'property_detail' property.id %}?view=compact"
+title="View full property details">
 
 <i class="fas fa-eye me-1"></i>
 View
@@ -194,7 +385,8 @@ View
 {% if user.is_authenticated and property.user_id == user.id %}
 
 <a class="btn btn-outline-primary btn-sm"
-href="{% url 'property_edit' property.id %}">
+href="{% url 'property_edit' property.id %}"
+title="Edit this property">
 
 <i class="fas fa-edit me-1"></i>
 Edit
@@ -203,7 +395,8 @@ Edit
 
 
 <a class="btn btn-outline-danger btn-sm"
-href="{% url 'property_delete' property.id %}">
+href="{% url 'property_delete' property.id %}"
+title="Delete this property">
 
 <i class="fas fa-trash me-1"></i>
 Delete
@@ -224,9 +417,9 @@ Delete
 
 <div class="col-12">
 
-<div class="alert alert-info text-center py-4">
+<div class="alert alert-info text-center py-4 empty-state">
 
-<i class="fas fa-inbox fa-2x mb-3 d-block"></i>
+<i class="fas fa-inbox fa-2x mb-3 d-block text-primary"></i>
 
 <strong>No properties found</strong>
 
@@ -240,8 +433,73 @@ Try adjusting your filters or create a new listing
 
 {% endfor %}
 
-</div>
+</div></div>
 
 </section>
 
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Add smooth transitions to all interactive elements
+    document.addEventListener('DOMContentLoaded', function() {
+        // Property card interactions
+        const cards = document.querySelectorAll('.property-card');
+        
+        cards.forEach(card => {
+            // Add touch feedback for mobile
+            card.addEventListener('touchstart', function() {
+                this.style.opacity = '0.95';
+            });
+            
+            card.addEventListener('touchend', function() {
+                this.style.opacity = '1';
+            });
+
+            // Keyboard navigation support
+            card.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const viewLink = this.querySelector('a.btn-primary');
+                    if (viewLink) viewLink.click();
+                }
+            });
+        });
+
+        // Filter forms smooth submission
+        const filterForms = document.querySelectorAll('form');
+        filterForms.forEach(form => {
+            const selects = form.querySelectorAll('select');
+            selects.forEach(select => {
+                select.addEventListener('change', function() {
+                    // Add loading state
+                    const originalText = this.textContent;
+                    const parentCard = this.closest('.property-card');
+                    if (parentCard) {
+                        parentCard.style.opacity = '0.6';
+                    }
+                });
+            });
+        });
+
+        // Staggered animation on page load
+        const items = document.querySelectorAll('.property-item');
+        items.forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.05}s`;
+        });
+
+        // Image lazy loading improvement
+        const images = document.querySelectorAll('.property-img');
+        images.forEach(img => {
+            img.addEventListener('load', function() {
+                this.style.opacity = '1';
+                this.style.transition = 'opacity 0.3s ease';
+            });
+        });
+    });
+
+    // Smooth scroll behavior
+    if (window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+        document.documentElement.style.scrollBehavior = 'smooth';
+    }
+</script>
 {% endblock %}

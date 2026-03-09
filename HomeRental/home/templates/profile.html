@@ -1,75 +1,119 @@
 {% extends "layout.html" %}
 
+<!-- Template: User Profile Page
+     Purpose: Allow authenticated users to view and edit their profile information
+     Features: Edit profile picture, first/last name, username, email, phone number; change password link
+     For: Logged-in users to manage their account details
+     Forms: UserUpdateForm (user info), ProfileUpdateForm (profile-specific data like phone, image)
+-->
+
 {% block title %}My Profile{% endblock %}
 
 {% block content %}
+<!-- Profile section: Main container for user profile form -->
 <section class="container py-5">
+    <!-- Centered row with responsive column sizing -->
     <div class="row justify-content-center">
         <div class="col-12 col-lg-10">
+            <!-- Profile card: Main white card container with shadow -->
             <div class="card shadow-lg border-0 mb-4">
+                
+                <!-- Card header: Page title and change password button -->
                 <div class="card-header bg-primary text-white py-4">
+                    <!-- Header content: Title on left, change password button on right -->
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <!-- Page title with icon -->
                         <h1 class="h3 mb-0">
                             <i class="fas fa-user-circle me-2"></i>My Profile
                         </h1>
+                        <!-- Change password button: Links to password change page -->
                         <a href="{% url 'password_change' %}" class="btn btn-light btn-sm fw-semibold">
                             <i class="fas fa-key me-2"></i>Change Password
                         </a>
                     </div>
                 </div>
 
+                <!-- Card body: Profile edit form -->
                 <div class="card-body p-5">
+                    <!-- Form with file upload (for profile picture) -->
                     <form method="post" enctype="multipart/form-data" novalidate>
                         {% csrf_token %}
 
+                        <!-- Error message display -->
                         {% if form.non_field_errors %}
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <!-- Loop through and display all non-field errors -->
                             {% for error in form.non_field_errors %}
                             <div>{{ error }}</div>
                             {% endfor %}
+                            <!-- Dismissible alert button -->
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                         {% endif %}
 
+                        <!-- Two-column layout: Profile picture on left, form fields on right -->
                         <div class="row g-4">
+                            
+                            <!-- LEFT COLUMN: Profile picture section -->
                             <div class="col-12 col-md-4">
+                                <!-- Label for profile picture section -->
                                 <label class="form-label fw-semibold">Profile Picture</label>
+                                
+                                <!-- Current profile picture display -->
                                 <div class="mb-3">
                                     {% if user.profile.image %}
+                                    <!-- If user has uploaded a picture, show it -->
                                     <img src="{{ user.profile.image.url }}" alt="Profile photo" class="img-thumbnail rounded-circle" style="width: 160px; height: 160px; object-fit: cover;">
                                     {% else %}
+                                    <!-- Default avatar: First letter of username in circle -->
                                     <div class="rounded-circle bg-light border border-2 d-inline-flex align-items-center justify-content-center fw-bold" style="width: 160px; height: 160px; font-size: 3rem; color: #88a0d8;">
                                         {{ user.username|first|upper }}
                                     </div>
                                     {% endif %}
                                 </div>
+                                
+                                <!-- File input for uploading new profile picture -->
                                 <div class="mb-3">
                                     {{ profile_form.image }}
                                 </div>
                             </div>
 
+                            <!-- RIGHT COLUMN: User information form fields -->
                             <div class="col-12 col-md-8">
+                                <!-- Grid of form fields in 2 columns on larger screens -->
                                 <div class="row g-3">
+                                    
+                                    <!-- First Name field -->
                                     <div class="col-12 col-md-6">
                                         <label class="form-label fw-semibold">First Name</label>
                                         {{ user_form.first_name }}
                                     </div>
+                                    
+                                    <!-- Last Name field -->
                                     <div class="col-12 col-md-6">
                                         <label class="form-label fw-semibold">Last Name</label>
                                         {{ user_form.last_name }}
                                     </div>
+                                    
+                                    <!-- Username field (can be edited) -->
                                     <div class="col-12 col-md-6">
                                         <label class="form-label fw-semibold">Username</label>
                                         {{ user_form.username }}
                                     </div>
+                                    
+                                    <!-- User ID field (display only, disabled) -->
                                     <div class="col-12 col-md-6">
                                         <label class="form-label fw-semibold">User ID</label>
                                         <input type="text" class="form-control" value="{{ user.id }}" disabled>
                                     </div>
+                                    
+                                    <!-- Email field (full width) -->
                                     <div class="col-12">
                                         <label class="form-label fw-semibold">Email</label>
                                         {{ user_form.email }}
                                     </div>
+                                    
+                                    <!-- Phone number field (full width) - from Profile model -->
                                     <div class="col-12">
                                         <label class="form-label fw-semibold">Phone Number</label>
                                         {{ profile_form.phone_number }}
@@ -78,10 +122,13 @@
                             </div>
                         </div>
 
+                        <!-- Form action buttons -->
                         <div class="mt-5 d-flex gap-3 flex-wrap">
+                            <!-- Submit button to save profile changes -->
                             <button type="submit" class="btn btn-primary btn-lg fw-semibold">
                                 <i class="fas fa-save me-2"></i>Save Changes
                             </button>
+                            <!-- Cancel button to return to home -->
                             <a href="{% url 'home_list' %}" class="btn btn-outline-secondary btn-lg fw-semibold">
                                 <i class="fas fa-times me-2"></i>Cancel
                             </a>
@@ -93,22 +140,27 @@
     </div>
 </section>
 
+<!-- Page-specific styling for form inputs and buttons -->
 <style>
+  /* Style form inputs: rounded corners and consistent borders */
   .form-control, .form-select {
     border-radius: 0.5rem;
     border: 1px solid #dee2e6;
     padding: 0.65rem 1rem;
   }
   
+  /* Style form inputs when focused: highlight with blue border and shadow */
   .form-control:focus, .form-select:focus {
     border-color: #0d6efd;
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
   }
   
+  /* Larger button padding for clickable buttons -->
   .btn-lg {
     padding: 0.75rem 2rem;
   }
   
+  /* Profile image thumbnail styling with border -->
   .img-thumbnail {
     border: 3px solid #dee2e6;
   }
