@@ -1,52 +1,39 @@
 {% extends "layout.html" %}
 
 {% block title %}
-{% if is_edit %}Edit Property{% else %}Create Property{% endif %}
+{% if form.instance.pk %}Edit Property{% else %}Create Property{% endif %}
 {% endblock %}
 
 {% block extra_head %}
 <style>
   .property-form-bg {
-    background-image:
-      linear-gradient(rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.18)),
-      url("https://i.pinimg.com/736x/da/09/66/da0966c629589e99965675c85c564fe8.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    background-color: #f8f9fa;
   }
 
   .property-form-card {
-    background: rgba(255, 255, 255, 0.14);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-    border: 1px solid rgba(255, 255, 255, 0.45);
+    background: #ffffff;
+    border: 1px solid #e3e8ef;
   }
 
   .property-form-card .card-body {
-    color: #ffffff;
+    color: #1f2a37;
   }
 
   .property-form-card h1 {
-    color: #ffffff;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-  }
-
-  .property-form-card p label {
-    color: #ffffff;
-    font-weight: 600;
-    margin-bottom: 0.35rem;
+    color: #142033;
+    text-shadow: none;
   }
 
   .property-form-card input:not([type="file"]),
   .property-form-card select,
   .property-form-card textarea {
-    background: rgba(255, 255, 255, 0.14);
-    border: 1px solid rgba(255, 255, 255, 0.55);
-    color: #ffffff;
+    background: #ffffff;
+    border: 1px solid #cfd8e3;
+    color: #1f2a37;
   }
 
   .property-form-card select {
-    background: rgba(255, 255, 255, 0.8);
+    background: #ffffff;
     color: #111111;
   }
 
@@ -57,26 +44,26 @@
 
   .property-form-card input:not([type="file"])::placeholder,
   .property-form-card textarea::placeholder {
-    color: rgba(255, 255, 255, 0.72);
+    color: #6c757d;
   }
 
   .property-form-card input:focus,
   .property-form-card select:focus,
   .property-form-card textarea:focus {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.8);
-    color: #ffffff;
-    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.18);
+    background: #ffffff;
+    border-color: #86b7fe;
+    color: #1f2a37;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
   }
 
   .property-form-card select:focus {
-    background: rgba(255, 255, 255, 0.9);
+    background: #ffffff;
     color: #111111;
   }
 
   .form-label-custom {
     display: block;
-    color: #ffffff;
+    color: #23344b;
     font-weight: 600;
     margin-bottom: 0.35rem;
   }
@@ -85,19 +72,19 @@
     margin-top: 1.5rem;
     padding: 1rem;
     border-radius: 16px;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: #f8fbff;
+    border: 1px solid #dbe6f5;
   }
 
   .map-title {
-    color: #ffffff;
+    color: #23344b;
     font-weight: 600;
     margin-bottom: 0.75rem;
     text-align: center;
   }
 
   .map-help {
-    color: rgba(255, 255, 255, 0.85);
+    color: #58677b;
     text-align: center;
     margin-top: 0.65rem;
     margin-bottom: 0;
@@ -109,8 +96,8 @@
     margin: 0 auto;
     border-radius: 50%;
     overflow: hidden;
-    border: 4px solid rgba(255, 255, 255, 0.75);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+    border: 4px solid #dbe6f5;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
   }
 
   #map {
@@ -126,7 +113,7 @@
     <div class="col-12 col-lg-8">
       <div class="card shadow-sm property-form-card">
         <div class="card-body p-4">
-          <h1 class="h3 mb-4">{% if is_edit %}Edit Property{% else %}Create Property{% endif %}</h1>
+          <h1 class="h3 mb-4">{% if form.instance.pk %}Edit Property{% else %}Create Property{% endif %}</h1>
           <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
@@ -142,10 +129,6 @@
               <div class="col-12">
                 <label class="form-label-custom" for="{{ form.description.id_for_label }}">Description</label>
                 {{ form.description }}
-              </div>
-              <div class="col-12">
-                <label class="form-label-custom" for="{{ form.location.id_for_label }}">Location</label>
-                {{ form.location }}
               </div>
               <div class="col-12 col-md-4">
                 <label class="form-label-custom" for="{{ form.contact_name.id_for_label }}">Contact Name</label>
@@ -169,6 +152,7 @@
               </div>
             </div>
 
+            {{ form.location.as_hidden }}
             <input type="hidden" id="latitude" name="latitude" value="{{ form.latitude.value|default_if_none:'' }}">
             <input type="hidden" id="longitude" name="longitude" value="{{ form.longitude.value|default_if_none:'' }}">
 
@@ -177,11 +161,15 @@
               <div class="map-circle">
                 <div id="map"></div>
               </div>
-              <p class="map-help">Click anywhere on the map to set latitude and longitude.</p>
+              <p class="map-help">Click anywhere on the map to set latitude, longitude, and location text.</p>
+              <p class="map-help" id="selected-location-display"></p>
+              {% if form.location.errors %}
+              <p class="text-danger small mb-0">{{ form.location.errors|join:", " }}</p>
+              {% endif %}
             </div>
 
             <div class="d-flex flex-wrap gap-2 mt-3">
-              <button class="btn btn-primary" type="submit">{% if is_edit %}Update{% else %}Create{% endif %}</button>
+              <button class="btn btn-primary" type="submit">{% if form.instance.pk %}Update{% else %}Create{% endif %}</button>
               <a class="btn btn-outline-secondary" href="{% url 'properties' %}">Cancel</a>
             </div>
           </form>
@@ -196,10 +184,14 @@
 <script>
     var latInput = document.getElementById('latitude');
     var lngInput = document.getElementById('longitude');
+    var locationInput = document.getElementById('id_location');
+    var locationDisplay = document.getElementById('selected-location-display');
+    var propertyForm = document.querySelector('form[method="post"]');
+    var locationRequestId = 0;
 
     var defaultLat = parseFloat(latInput.value) || 26.6735;
     var defaultLng = parseFloat(lngInput.value) || 87.2773;
-    var map = L.map('map').setView([defaultLat, defaultLng], 13); // Default location
+    var map = L.map('map').setView([defaultLat, defaultLng], 13);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '(c) OpenStreetMap contributors'
@@ -214,22 +206,83 @@
         map.invalidateSize();
     }, 0);
 
+    function setLocationValue(value) {
+        if (!locationInput) {
+            return;
+        }
+        var normalizedValue = (value || '').trim().slice(0, 200);
+        locationInput.value = normalizedValue;
+        if (locationDisplay) {
+            locationDisplay.textContent = normalizedValue;
+        }
+    }
+
+    function setLocationFallback(lat, lng) {
+        setLocationValue(lat.toFixed(6) + ', ' + lng.toFixed(6));
+    }
+
+    function updateLocationFromMap(lat, lng) {
+        if (!locationInput) {
+            return;
+        }
+
+        var requestId = ++locationRequestId;
+        setLocationFallback(lat, lng);
+
+        fetch(
+            'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='
+            + encodeURIComponent(lat)
+            + '&lon='
+            + encodeURIComponent(lng),
+            { headers: { 'Accept': 'application/json' } }
+        )
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('Unable to fetch location');
+            }
+            return response.json();
+        })
+        .then(function(data) {
+            if (requestId !== locationRequestId) {
+                return;
+            }
+            if (data && data.display_name) {
+                setLocationValue(data.display_name);
+            }
+        })
+        .catch(function() {
+            // Keep the coordinate fallback if reverse geocoding fails.
+        });
+    }
+
+    if (locationInput && locationInput.value.trim()) {
+        setLocationValue(locationInput.value);
+    }
+
+    if (latInput.value && lngInput.value && locationInput && !locationInput.value.trim()) {
+        updateLocationFromMap(defaultLat, defaultLng);
+    }
+
     map.on('click', function(e) {
         var lat = e.latlng.lat;
         var lng = e.latlng.lng;
 
-        // Remove old marker
         if (marker) {
             map.removeLayer(marker);
         }
 
-        // Add new marker
         marker = L.marker([lat, lng]).addTo(map);
-
-        // Set hidden input values
-        document.getElementById('latitude').value = lat;
-        document.getElementById('longitude').value = lng;
+        latInput.value = lat.toFixed(6);
+        lngInput.value = lng.toFixed(6);
+        updateLocationFromMap(lat, lng);
     });
+
+    if (propertyForm) {
+        propertyForm.addEventListener('submit', function() {
+            if (locationInput && !locationInput.value.trim() && latInput.value && lngInput.value) {
+                setLocationFallback(parseFloat(latInput.value), parseFloat(lngInput.value));
+            }
+        });
+    }
 </script>
 {% endblock %}
-
