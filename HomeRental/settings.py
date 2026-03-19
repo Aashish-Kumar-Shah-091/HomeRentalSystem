@@ -26,7 +26,16 @@ SECRET_KEY = 'django-insecure-^jfqx_ra3f5!_zp0#rr50cy5qav3sxx)hm*ob&v^_%4)3rm%5e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True  # Set to False in production
 
-ALLOWED_HOSTS = []  # Add your domain names here in production
+# Hosts/origins allowed for both HTTP and WebSocket traffic.
+# Override in production with DJANGO_ALLOWED_HOSTS=example.com,www.example.com
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get(
+        "DJANGO_ALLOWED_HOSTS",
+        "localhost,127.0.0.1,[::1]",
+    ).split(",")
+    if host.strip()
+]
 
 
 # ===== INSTALLED APPLICATIONS =====
@@ -37,7 +46,10 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',  # Content types framework
     'django.contrib.sessions',  # Session management
     'django.contrib.messages',  # Message framework for user notifications
+    'daphne',  # Daphne provides the ASGI-aware runserver command used by Channels.
     'django.contrib.staticfiles',  # Static files management
+    'channels',  # Django Channels for WebSocket support
+    'chat',  # Accepted-booking chat app
     'home',  # Our home rental app
 ]
 
@@ -55,6 +67,7 @@ MIDDLEWARE = [
 
 # ===== URL CONFIGURATION =====
 ROOT_URLCONF = 'HomeRental.urls'  # Root URL configuration
+ASGI_APPLICATION = 'HomeRental.asgi.application'  # ASGI app used by Channels/uvicorn
 
 # ===== TEMPLATE CONFIGURATION =====
 TEMPLATES = [
@@ -75,6 +88,28 @@ TEMPLATES = [
 
 # ===== WSGI APPLICATION =====
 WSGI_APPLICATION = 'HomeRental.wsgi.application'  # WSGI application for web servers
+
+
+# ===== CHANNELS / WEBSOCKETS =====
+# Default to an in-memory layer for local development. Set CHANNEL_REDIS_URL in
+# production to use a shared Redis-backed layer across multiple workers.
+CHANNEL_REDIS_URL = os.environ.get("CHANNEL_REDIS_URL", "").strip()
+
+if CHANNEL_REDIS_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [CHANNEL_REDIS_URL],
+            },
+        }
+    }
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
+        }
+    }
 
 
 # ===== DATABASE CONFIGURATION =====
@@ -140,3 +175,39 @@ LOGIN_URL = '/accounts/login'  # URL to redirect to for login
 LOGIN_REDIRECT_URL = '/home/'  # URL to redirect to after successful login
 LOGOUT_REDIRECT_URL = '/home/'  # URL to redirect to after logout
 
+
+# ===== EMAIL CONFIGURATION =====
+# Uses Django's built-in email backend (SMTP). If EMAIL_HOST is not set,
+# emails are printed to the console (useful for development).
+#
+# Configure via environment variables (examples):
+# - Gmail SMTP:
+#   EMAIL_HOST=smtp.gmail.com
+#   EMAIL_PORT=587
+#   EMAIL_USE_TLS=1
+#   EMAIL_HOST_USER=you@gmail.com
+#   EMAIL_HOST_PASSWORD=your_app_password
+# - SendGrid SMTP:
+#   EMAIL_HOST=smtp.sendgrid.net
+#   EMAIL_PORT=587
+#   EMAIL_USE_TLS=1
+#   EMAIL_HOST_USER=apikey
+#   EMAIL_HOST_PASSWORD=your_sendgrid_api_key
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "").strip()
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1").lower() not in ("0", "false", "no")
+EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "0").lower() in ("1", "true", "yes")
+EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", "10"))
+
+DEFAULT_FROM_EMAIL = os.environ.get(
+    "DEFAULT_FROM_EMAIL",
+    "Ghar Setu <no-reply@gharsetu.local>",
+)
+
+if EMAIL_HOST:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+else:
+    # Safe default for local development (prints emails to the console)
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

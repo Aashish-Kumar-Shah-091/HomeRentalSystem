@@ -1,0 +1,10 @@
+{% with fallback=fallback_url|default:"/" label_text=label|default:"Back" classes=btn_class|default:"btn btn-outline-secondary btn-sm fw-semibold" %}
+<button
+  type="button"
+  class="{{ classes }}"
+  onclick="(window.history.length > 1) ? window.history.back() : (window.location.href='{{ fallback }}');"
+>
+  <i class="fas fa-arrow-left me-2"></i>{{ label_text }}
+</button>
+{% endwith %}
+

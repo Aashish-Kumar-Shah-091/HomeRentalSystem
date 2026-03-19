@@ -26,6 +26,7 @@ urlpatterns = [
     
     # All home rental app URLs (properties, bookings, notifications, etc.)
     path('', include('home.urls')),
+    path('chat/', include('chat.urls')),
     
     # Django built-in authentication URLs (login, logout, password change, etc.)
     path('accounts/', include('django.contrib.auth.urls')),

@@ -1,0 +1,25 @@
+Booking Cancellation
+
+Hi {{ customer_name }},
+
+Your booking has been canceled.
+
+Cancellation reason:
+{{ cancellation_reason }}
+
+Booking details
+- Booking ID: #{{ booking_id }}
+- Canceled on: {{ canceled_date }}
+- Status: {{ booking_status }}
+- Property: {{ property_title }}
+- Location: {{ property_location }}
+- Total amount: {{ total_amount }}
+
+Refund details:
+{{ refund_details }}
+
+Browse other properties:
+{{ properties_url }}
+
+— {{ site_name|default:"Ghar Setu" }}
+

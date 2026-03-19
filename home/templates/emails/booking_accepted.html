@@ -1,0 +1,94 @@
+{% extends "emails/base.html" %}
+
+{% block email_title %}Your Booking Has Been Accepted{% endblock %}
+
+{% block preheader %}
+Good news — your booking #{{ booking_id }} has been accepted.
+{% endblock %}
+
+{% block headline %}Your Booking Has Been Accepted{% endblock %}
+
+{% block subhead %}
+<div style="margin-top:6px; font-size:13px; color:#6b7280;">
+  Booking <strong>#{{ booking_id }}</strong> • <span style="font-weight:700; color:#111827;">{{ booking_status }}</span>
+</div>
+{% endblock %}
+
+{% block body %}
+<div style="font-size:14px; color:#111827; line-height:1.6;">
+  <p style="margin:0 0 12px 0;">Hi {{ customer_name }},</p>
+  <p style="margin:0 0 12px 0;">
+    Great news! Your booking request has been accepted. You can now contact the owner to confirm move-in details.
+  </p>
+
+  <div style="margin:16px 0; padding:14px; background:#f0fdf4; border:1px solid #dcfce7; border-radius:12px;">
+    <div style="font-weight:800; margin:0 0 8px 0;">Next steps</div>
+    <ul style="margin:0; padding-left:18px;">
+      <li>Review the property details and confirm the schedule.</li>
+      <li>Contact the owner using the details below.</li>
+      <li>Keep your booking ID handy for reference.</li>
+    </ul>
+  </div>
+
+  <div style="margin:16px 0; padding:14px; background:#f9fafb; border:1px solid #eef0f4; border-radius:12px;">
+    <div style="font-weight:800; margin:0 0 10px 0;">Booking details</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size:14px;">
+      <tr>
+        <td style="padding:6px 0; color:#6b7280;">Booking ID</td>
+        <td style="padding:6px 0; text-align:right; font-weight:700;">#{{ booking_id }}</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0; color:#6b7280;">Accepted on</td>
+        <td style="padding:6px 0; text-align:right; font-weight:700;">{{ accepted_date }}</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0; color:#6b7280;">Property</td>
+        <td style="padding:6px 0; text-align:right; font-weight:700;">{{ property_title }}</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0; color:#6b7280;">Location</td>
+        <td style="padding:6px 0; text-align:right; font-weight:700;">{{ property_location }}</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0; color:#6b7280;">Total amount</td>
+        <td style="padding:6px 0; text-align:right; font-weight:700;">{{ total_amount }}</td>
+      </tr>
+    </table>
+  </div>
+
+  <div style="margin:16px 0; padding:14px; background:#eff6ff; border:1px solid #dbeafe; border-radius:12px;">
+    <div style="font-weight:800; margin:0 0 10px 0;">Owner contact</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size:14px;">
+      <tr>
+        <td style="padding:6px 0; color:#6b7280;">Name</td>
+        <td style="padding:6px 0; text-align:right; font-weight:700;">{{ owner_contact_name }}</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0; color:#6b7280;">Phone</td>
+        <td style="padding:6px 0; text-align:right; font-weight:700;">{{ owner_contact_phone }}</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0; color:#6b7280;">Email</td>
+        <td style="padding:6px 0; text-align:right; font-weight:700;">{{ owner_contact_email }}</td>
+      </tr>
+    </table>
+  </div>
+
+  <p style="margin:0;">
+    View property link:<br>
+    <a href="{{ property_url }}" style="color:#0d6efd; word-break:break-all;">{{ property_url }}</a>
+  </p>
+</div>
+{% endblock %}
+
+{% block cta %}
+<tr>
+  <td style="padding:0 22px 22px 22px;">
+    <a class="btn" href="{{ property_url }}" target="_blank" rel="noopener noreferrer"
+       style="display:inline-block; background:#16a34a; color:#ffffff; text-decoration:none; font-weight:800; padding:12px 16px; border-radius:12px;">
+      View property
+    </a>
+  </td>
+</tr>
+{% endblock %}
+

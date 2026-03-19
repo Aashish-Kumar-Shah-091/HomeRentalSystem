@@ -1,168 +1,675 @@
-{% extends "layout.html" %}
-
-<!-- Template: User Profile Page
-     Purpose: Allow authenticated users to view and edit their profile information
-     Features: Edit profile picture, first/last name, username, email, phone number; change password link
-     For: Logged-in users to manage their account details
-     Forms: UserUpdateForm (user info), ProfileUpdateForm (profile-specific data like phone, image)
--->
+{% extends "layout_minimal.html" %}
+{% load static %}
 
 {% block title %}My Profile{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
 {% block content %}
-<!-- Profile section: Main container for user profile form -->
-<section class="container py-5">
-    <!-- Centered row with responsive column sizing -->
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-10">
-            <!-- Profile card: Main white card container with shadow -->
-            <div class="card shadow-lg border-0 mb-4">
-                
-                <!-- Card header: Page title and change password button -->
-                <div class="card-header bg-primary text-white py-4">
-                    <!-- Header content: Title on left, change password button on right -->
-                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                        <!-- Page title with icon -->
-                        <h1 class="h3 mb-0">
-                            <i class="fas fa-user-circle me-2"></i>My Profile
-                        </h1>
-                        <!-- Change password button: Links to password change page -->
-                        <a href="{% url 'password_change' %}" class="btn btn-light btn-sm fw-semibold">
-                            <i class="fas fa-key me-2"></i>Change Password
-                        </a>
-                    </div>
-                </div>
+{% url 'home_list' as back_fallback %}
 
-                <!-- Card body: Profile edit form -->
-                <div class="card-body p-5">
-                    <!-- Form with file upload (for profile picture) -->
-                    <form method="post" enctype="multipart/form-data" novalidate>
-                        {% csrf_token %}
-
-                        <!-- Error message display -->
-                        {% if form.non_field_errors %}
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <!-- Loop through and display all non-field errors -->
-                            {% for error in form.non_field_errors %}
-                            <div>{{ error }}</div>
-                            {% endfor %}
-                            <!-- Dismissible alert button -->
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                        {% endif %}
-
-                        <!-- Two-column layout: Profile picture on left, form fields on right -->
-                        <div class="row g-4">
-                            
-                            <!-- LEFT COLUMN: Profile picture section -->
-                            <div class="col-12 col-md-4">
-                                <!-- Label for profile picture section -->
-                                <label class="form-label fw-semibold">Profile Picture</label>
-                                
-                                <!-- Current profile picture display -->
-                                <div class="mb-3">
-                                    {% if user.profile.image %}
-                                    <!-- If user has uploaded a picture, show it -->
-                                    <img src="{{ user.profile.image.url }}" alt="Profile photo" class="img-thumbnail rounded-circle" style="width: 160px; height: 160px; object-fit: cover;">
-                                    {% else %}
-                                    <!-- Default avatar: First letter of username in circle -->
-                                    <div class="rounded-circle bg-light border border-2 d-inline-flex align-items-center justify-content-center fw-bold" style="width: 160px; height: 160px; font-size: 3rem; color: #88a0d8;">
-                                        {{ user.username|first|upper }}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                
-                                <!-- File input for uploading new profile picture -->
-                                <div class="mb-3">
-                                    {{ profile_form.image }}
-                                </div>
-                            </div>
-
-                            <!-- RIGHT COLUMN: User information form fields -->
-                            <div class="col-12 col-md-8">
-                                <!-- Grid of form fields in 2 columns on larger screens -->
-                                <div class="row g-3">
-                                    
-                                    <!-- First Name field -->
-                                    <div class="col-12 col-md-6">
-                                        <label class="form-label fw-semibold">First Name</label>
-                                        {{ user_form.first_name }}
-                                    </div>
-                                    
-                                    <!-- Last Name field -->
-                                    <div class="col-12 col-md-6">
-                                        <label class="form-label fw-semibold">Last Name</label>
-                                        {{ user_form.last_name }}
-                                    </div>
-                                    
-                                    <!-- Username field (can be edited) -->
-                                    <div class="col-12 col-md-6">
-                                        <label class="form-label fw-semibold">Username</label>
-                                        {{ user_form.username }}
-                                    </div>
-                                    
-                                    <!-- User ID field (display only, disabled) -->
-                                    <div class="col-12 col-md-6">
-                                        <label class="form-label fw-semibold">User ID</label>
-                                        <input type="text" class="form-control" value="{{ user.id }}" disabled>
-                                    </div>
-                                    
-                                    <!-- Email field (full width) -->
-                                    <div class="col-12">
-                                        <label class="form-label fw-semibold">Email</label>
-                                        {{ user_form.email }}
-                                    </div>
-                                    
-                                    <!-- Phone number field (full width) - from Profile model -->
-                                    <div class="col-12">
-                                        <label class="form-label fw-semibold">Phone Number</label>
-                                        {{ profile_form.phone_number }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Form action buttons -->
-                        <div class="mt-5 d-flex gap-3 flex-wrap">
-                            <!-- Submit button to save profile changes -->
-                            <button type="submit" class="btn btn-primary btn-lg fw-semibold">
-                                <i class="fas fa-save me-2"></i>Save Changes
-                            </button>
-                            <!-- Cancel button to return to home -->
-                            <a href="{% url 'home_list' %}" class="btn btn-outline-secondary btn-lg fw-semibold">
-                                <i class="fas fa-times me-2"></i>Cancel
-                            </a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+<section
+  class="profile-cover"
+  {% if profile_form.instance.image %}
+  style="background-image: linear-gradient(115deg, rgba(13,110,253,0.86) 0%, rgba(102,16,242,0.78) 45%, rgba(32,201,151,0.78) 100%), url('{{ profile_form.instance.image.url }}');"
+  {% endif %}
+>
+  <div class="container py-3 py-lg-4">
+    <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+      {% include "partials/back_button.html" with fallback_url=back_fallback label="Back" btn_class="btn btn-light btn-sm fw-semibold shadow-sm" %}
+      <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'home_list' %}" class="btn btn-light btn-sm fw-semibold shadow-sm">
+          <i class="fas fa-house me-2"></i>Home
+        </a>
+        <a href="{% url 'notifications' %}" class="btn btn-light btn-sm fw-semibold shadow-sm">
+          <i class="fas fa-bell me-2"></i>Notifications
+        </a>
+        <a href="{% url 'password_change' %}" class="btn btn-light btn-sm fw-semibold shadow-sm">
+          <i class="fas fa-key me-2"></i>Password
+        </a>
+      </div>
     </div>
+  </div>
 </section>
 
-<!-- Page-specific styling for form inputs and buttons -->
-<style>
-  /* Style form inputs: rounded corners and consistent borders */
-  .form-control, .form-select {
-    border-radius: 0.5rem;
-    border: 1px solid #dee2e6;
-    padding: 0.65rem 1rem;
-  }
-  
-  /* Style form inputs when focused: highlight with blue border and shadow */
-  .form-control:focus, .form-select:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-  }
-  
-  /* Larger button padding for clickable buttons -->
-  .btn-lg {
-    padding: 0.75rem 2rem;
-  }
-  
-  /* Profile image thumbnail styling with border -->
-  .img-thumbnail {
-    border: 3px solid #dee2e6;
-  }
-</style>
+<section class="container profile-header-wrap pb-4">
+  <div class="card border-0 shadow-sm profile-tab-card">
+    <div class="card-body p-4 p-lg-5">
+
+      <div class="d-flex flex-wrap align-items-end gap-3">
+        <div class="profile-avatar">
+          <img
+            id="profileAvatarImg"
+            class="profile-avatar-img {% if not profile_form.instance.image %}d-none{% endif %}"
+            src="{% if profile_form.instance.image %}{{ profile_form.instance.image.url }}{% endif %}"
+            alt="Profile photo"
+          >
+          <div
+            id="profileAvatarPlaceholder"
+            class="profile-avatar-placeholder {% if profile_form.instance.image %}d-none{% endif %}"
+            aria-hidden="{% if profile_form.instance.image %}true{% else %}false{% endif %}"
+          >
+            {{ user.username|first|upper }}
+          </div>
+          <button type="button" class="btn btn-light btn-sm profile-avatar-btn" data-profile-action="change-photo" aria-label="Change profile photo">
+            <i class="fas fa-camera"></i>
+          </button>
+        </div>
+
+        <div class="flex-grow-1">
+          <h1 class="h3 mb-0">{{ user.get_full_name|default:user.username }}</h1>
+          <div class="text-muted">@{{ user.username }}</div>
+
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            <span class="badge text-bg-light border">
+              <i class="fas fa-envelope me-1 text-primary"></i>
+              {{ user.email|default:"No email" }}
+              {% if user.email %}
+              <button type="button" class="btn btn-link btn-sm p-0 ms-2" data-copy="{{ user.email }}" aria-label="Copy email">
+                <i class="far fa-copy"></i>
+              </button>
+              {% endif %}
+            </span>
+            <span class="badge text-bg-light border">
+              <i class="fas fa-phone me-1 text-success"></i>
+              {{ profile_form.instance.phone_number|default:"No phone" }}
+              {% if profile_form.instance.phone_number %}
+              <button type="button" class="btn btn-link btn-sm p-0 ms-2" data-copy="{{ profile_form.instance.phone_number }}" aria-label="Copy phone number">
+                <i class="far fa-copy"></i>
+              </button>
+              {% endif %}
+            </span>
+            <span class="badge text-bg-light border">
+              <i class="fas fa-id-badge me-1 text-secondary"></i>ID: {{ user.id }}
+            </span>
+          </div>
+        </div>
+
+        <div class="ms-auto d-flex flex-wrap gap-2">
+          <a href="{% url 'favorite_list' %}" class="btn btn-outline-warning fw-semibold">
+            <i class="fas fa-heart me-2"></i>Saved Properties
+          </a>
+          <a href="{% url 'property' %}" class="btn btn-outline-primary fw-semibold">
+            <i class="fas fa-plus me-2"></i>List Property
+          </a>
+          <button type="button" class="btn btn-primary fw-semibold" data-profile-action="open-settings">
+            <i class="fas fa-user-pen me-2"></i>Edit Profile
+          </button>
+          <form method="post" action="{% url 'logout' %}" class="m-0">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger fw-semibold">
+              <i class="fas fa-right-from-bracket me-2"></i>Logout
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="row g-3 mt-4">
+        <div class="col-6 col-lg-3">
+          <div class="card border-0 shadow-sm profile-stat h-100" data-profile-open-tab="listings" role="button" tabindex="0">
+            <div class="card-body">
+              <div class="text-muted small">Listings</div>
+              <div class="d-flex align-items-center justify-content-between mt-1">
+                <div class="fs-4 fw-bold">{{ my_properties_count }}</div>
+                <div class="text-info"><i class="fas fa-building fa-lg"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="card border-0 shadow-sm profile-stat h-100" data-profile-open-tab="saved" role="button" tabindex="0">
+            <div class="card-body">
+              <div class="text-muted small">Saved</div>
+              <div class="d-flex align-items-center justify-content-between mt-1">
+                <div class="fs-4 fw-bold">{{ favorites_count }}</div>
+                <div class="text-warning"><i class="fas fa-heart fa-lg"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="card border-0 shadow-sm profile-stat h-100" data-profile-open-tab="bookings" role="button" tabindex="0">
+            <div class="card-body">
+              <div class="text-muted small">My Bookings</div>
+              <div class="d-flex align-items-center justify-content-between mt-1">
+                <div class="fs-4 fw-bold">{{ bookings_as_tenant_count }}</div>
+                <div class="text-success"><i class="fas fa-calendar-check fa-lg"></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted small">Profile completion</div>
+                <div class="small fw-semibold">{{ profile_completion }}%</div>
+              </div>
+              <div class="progress mt-2" style="height: 8px;">
+                <div
+                  class="progress-bar {% if profile_completion >= 85 %}bg-success{% elif profile_completion >= 55 %}bg-info{% else %}bg-warning{% endif %}"
+                  role="progressbar"
+                  style="width: {{ profile_completion }}%;"
+                  aria-valuenow="{{ profile_completion }}"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                ></div>
+              </div>
+              <div class="small text-muted mt-2">Complete your info to build trust.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if messages %}
+      <div class="mt-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-2" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="mt-4">
+        <ul class="nav nav-pills profile-tab-nav gap-2" id="profileTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link {% if active_tab == 'overview' %}active{% endif %}"
+              id="profile-tab-overview-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#profile-tab-overview"
+              type="button"
+              role="tab"
+              aria-controls="profile-tab-overview"
+              aria-selected="{% if active_tab == 'overview' %}true{% else %}false{% endif %}"
+              data-profile-tab="overview"
+            >
+              <i class="fas fa-house me-2"></i>Overview
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link {% if active_tab == 'listings' %}active{% endif %}"
+              id="profile-tab-listings-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#profile-tab-listings"
+              type="button"
+              role="tab"
+              aria-controls="profile-tab-listings"
+              aria-selected="{% if active_tab == 'listings' %}true{% else %}false{% endif %}"
+              data-profile-tab="listings"
+            >
+              <i class="fas fa-building me-2"></i>Listings
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link {% if active_tab == 'saved' %}active{% endif %}"
+              id="profile-tab-saved-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#profile-tab-saved"
+              type="button"
+              role="tab"
+              aria-controls="profile-tab-saved"
+              aria-selected="{% if active_tab == 'saved' %}true{% else %}false{% endif %}"
+              data-profile-tab="saved"
+            >
+              <i class="fas fa-heart me-2"></i>Saved
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link {% if active_tab == 'bookings' %}active{% endif %}"
+              id="profile-tab-bookings-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#profile-tab-bookings"
+              type="button"
+              role="tab"
+              aria-controls="profile-tab-bookings"
+              aria-selected="{% if active_tab == 'bookings' %}true{% else %}false{% endif %}"
+              data-profile-tab="bookings"
+            >
+              <i class="fas fa-calendar-alt me-2"></i>Bookings
+              {% if booking_requests_count %}
+              <span class="badge text-bg-primary ms-2">{{ booking_requests_count }}</span>
+              {% endif %}
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link {% if active_tab == 'settings' %}active{% endif %}"
+              id="profile-tab-settings-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#profile-tab-settings"
+              type="button"
+              role="tab"
+              aria-controls="profile-tab-settings"
+              aria-selected="{% if active_tab == 'settings' %}true{% else %}false{% endif %}"
+              data-profile-tab="settings"
+            >
+              <i class="fas fa-gear me-2"></i>Settings
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content pt-3" id="profileTabsContent">
+          <div class="tab-pane fade {% if active_tab == 'overview' %}show active{% endif %}" id="profile-tab-overview" role="tabpanel" aria-labelledby="profile-tab-overview-tab" tabindex="0">
+            <div class="row g-3">
+              <div class="col-12 col-lg-4">
+                <div class="card border-0 bg-light-subtle h-100">
+                  <div class="card-body">
+                    <h2 class="h6 mb-3"><i class="fas fa-circle-info me-2 text-primary"></i>About</h2>
+                    <div class="profile-kv">
+                      <span class="text-muted">Full name</span>
+                      <span class="fw-semibold">{{ user.get_full_name|default:"—" }}</span>
+                    </div>
+                    <div class="profile-kv">
+                      <span class="text-muted">Username</span>
+                      <span class="fw-semibold">@{{ user.username }}</span>
+                    </div>
+                    <div class="profile-kv">
+                      <span class="text-muted">Email</span>
+                      <span class="fw-semibold">{{ user.email|default:"—" }}</span>
+                    </div>
+                    <div class="profile-kv">
+                      <span class="text-muted">Phone</span>
+                      <span class="fw-semibold">{{ profile_form.instance.phone_number|default:"—" }}</span>
+                    </div>
+                    <div class="profile-kv">
+                      <span class="text-muted">Joined</span>
+                      <span class="fw-semibold">{{ user.date_joined|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="profile-kv">
+                      <span class="text-muted">Last login</span>
+                      <span class="fw-semibold">{{ user.last_login|date:"M d, Y H:i"|default:"—" }}</span>
+                    </div>
+                    <div class="mt-3 d-grid gap-2">
+                      <a href="{% url 'my_properties' %}" class="btn btn-outline-secondary btn-sm fw-semibold">
+                        <i class="fas fa-building me-2"></i>Manage listings
+                      </a>
+                      <a href="{% url 'favorite_list' %}" class="btn btn-outline-secondary btn-sm fw-semibold">
+                        <i class="fas fa-heart me-2"></i>View saved
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-lg-8">
+                <div class="card border-0 shadow-sm h-100">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                      <h2 class="h6 mb-0"><i class="fas fa-bolt me-2 text-success"></i>Recent Activity</h2>
+                      <a href="{% url 'notifications' %}" class="small text-decoration-none">View notifications</a>
+                    </div>
+
+                    <div class="row g-3">
+                      <div class="col-12 col-md-6">
+                        <div class="border rounded-3 p-3 h-100">
+                          <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="fw-semibold"><i class="fas fa-building me-2 text-info"></i>Latest listings</div>
+                            <a href="{% url 'my_properties' %}" class="small text-decoration-none">All</a>
+                          </div>
+                          <div class="list-group list-group-flush">
+                            {% for p in my_properties|slice:":3" %}
+                            <a class="list-group-item list-group-item-action px-0" href="{% url 'property_detail' p.id %}?view=compact">
+                              <div class="d-flex gap-3">
+                                {% if p.image_url %}
+                                <img src="{{ p.image_url }}" class="profile-thumb" alt="{{ p.title }}">
+                                {% else %}
+                                <div class="profile-thumb d-flex align-items-center justify-content-center text-muted">
+                                  <i class="fas fa-image"></i>
+                                </div>
+                                {% endif %}
+                                <div class="flex-grow-1">
+                                  <div class="fw-semibold">{{ p.title }}</div>
+                                  <div class="small text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ p.location }}</div>
+                                </div>
+                              </div>
+                            </a>
+                            {% empty %}
+                            <div class="text-muted small">No listings yet.</div>
+                            {% endfor %}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="col-12 col-md-6">
+                        <div class="border rounded-3 p-3 h-100">
+                          <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="fw-semibold"><i class="fas fa-heart me-2 text-warning"></i>Recently saved</div>
+                            <a href="{% url 'favorite_list' %}" class="small text-decoration-none">All</a>
+                          </div>
+                          <div class="list-group list-group-flush">
+                            {% for fav in recent_favorites|slice:":3" %}
+                            <a class="list-group-item list-group-item-action px-0" href="{% url 'property_detail' fav.property.id %}?view=compact">
+                              <div class="d-flex gap-3">
+                                {% if fav.property.image_url %}
+                                <img src="{{ fav.property.image_url }}" class="profile-thumb" alt="{{ fav.property.title }}">
+                                {% else %}
+                                <div class="profile-thumb d-flex align-items-center justify-content-center text-muted">
+                                  <i class="fas fa-image"></i>
+                                </div>
+                                {% endif %}
+                                <div class="flex-grow-1">
+                                  <div class="fw-semibold">{{ fav.property.title }}</div>
+                                  <div class="small text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ fav.property.location }}</div>
+                                </div>
+                              </div>
+                            </a>
+                            {% empty %}
+                            <div class="text-muted small">No saved properties yet.</div>
+                            {% endfor %}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="col-12">
+                        <div class="border rounded-3 p-3">
+                          <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+                            <div class="fw-semibold"><i class="fas fa-calendar-check me-2 text-success"></i>Recent bookings</div>
+                            <button type="button" class="btn btn-outline-secondary btn-sm fw-semibold" data-profile-open-tab="bookings">Open bookings tab</button>
+                          </div>
+                          <div class="list-group list-group-flush">
+                            {% for b in recent_bookings_as_tenant|slice:":3" %}
+                            <a class="list-group-item list-group-item-action px-0" href="{% url 'property_detail' b.property.id %}?view=compact">
+                              <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+                                <div class="me-auto">
+                                  <div class="fw-semibold">{{ b.property.title }}</div>
+                                  <div class="small text-muted">
+                                    <i class="fas fa-user me-1"></i>Owner: {{ b.owner.username }}
+                                    <span class="mx-2">•</span>
+                                    <i class="fas fa-clock me-1"></i>{{ b.booked_at|date:"M d, Y" }}
+                                  </div>
+                                </div>
+                                {% if b.status == 'ACCEPTED' %}
+                                <span class="badge text-bg-success">Accepted</span>
+                                {% elif b.status == 'REJECTED' %}
+                                <span class="badge text-bg-danger">Rejected</span>
+                                {% else %}
+                                <span class="badge text-bg-secondary">Pending</span>
+                                {% endif %}
+                              </div>
+                            </a>
+                            {% empty %}
+                            <div class="text-muted small">No bookings yet.</div>
+                            {% endfor %}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-pane fade {% if active_tab == 'listings' %}show active{% endif %}" id="profile-tab-listings" role="tabpanel" aria-labelledby="profile-tab-listings-tab" tabindex="0">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <div>
+                <div class="fw-semibold">Your listings</div>
+                <div class="text-muted small">Quick view of your latest properties.</div>
+              </div>
+              <a href="{% url 'my_properties' %}" class="btn btn-outline-secondary btn-sm fw-semibold">
+                <i class="fas fa-list me-2"></i>View all
+              </a>
+            </div>
+
+            <div class="row g-3">
+              {% for p in my_properties %}
+              <div class="col-12 col-md-6 col-lg-4">
+                <article class="card h-100 shadow-sm border-0">
+                  {% if p.image_url %}
+                  <img src="{{ p.image_url }}" class="card-img-top" style="height: 190px; object-fit: cover;" alt="{{ p.title }}">
+                  {% endif %}
+                  <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                      <h3 class="h6 mb-1">{{ p.title }}</h3>
+                      <span class="badge text-bg-light border">{{ p.property_type|title }}</span>
+                    </div>
+                    <div class="small text-muted mb-2"><i class="fas fa-map-marker-alt me-1"></i>{{ p.location }}</div>
+                    <div class="small fw-semibold mb-3">Rs. {{ p.price }}</div>
+                    <div class="mt-auto d-flex flex-wrap gap-2">
+                      <a class="btn btn-primary btn-sm" href="{% url 'property_detail' p.id %}?view=compact"><i class="fas fa-eye me-1"></i>View</a>
+                      <a class="btn btn-outline-primary btn-sm" href="{% url 'property_edit' p.id %}"><i class="fas fa-edit me-1"></i>Edit</a>
+                      <a class="btn btn-outline-danger btn-sm" href="{% url 'property_delete' p.id %}"><i class="fas fa-trash me-1"></i>Delete</a>
+                    </div>
+                  </div>
+                </article>
+              </div>
+              {% empty %}
+              <div class="col-12">
+                <div class="alert alert-info border-0 mb-0">
+                  <i class="fas fa-info-circle me-2"></i>No listings yet. Click <a href="{% url 'property' %}">List Property</a> to add one.
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="tab-pane fade {% if active_tab == 'saved' %}show active{% endif %}" id="profile-tab-saved" role="tabpanel" aria-labelledby="profile-tab-saved-tab" tabindex="0">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <div>
+                <div class="fw-semibold">Saved properties</div>
+                <div class="text-muted small">Your favorite listings in one place.</div>
+              </div>
+              <a href="{% url 'favorite_list' %}" class="btn btn-outline-secondary btn-sm fw-semibold">
+                <i class="fas fa-heart me-2"></i>View all
+              </a>
+            </div>
+
+            <div class="row g-3">
+              {% for fav in recent_favorites %}
+              <div class="col-12 col-md-6 col-lg-4">
+                <article class="card h-100 shadow-sm border-0">
+                  {% if fav.property.image_url %}
+                  <img src="{{ fav.property.image_url }}" class="card-img-top" style="height: 190px; object-fit: cover;" alt="{{ fav.property.title }}">
+                  {% endif %}
+                  <div class="card-body d-flex flex-column">
+                    <h3 class="h6 mb-1">{{ fav.property.title }}</h3>
+                    <div class="small text-muted mb-2"><i class="fas fa-map-marker-alt me-1"></i>{{ fav.property.location }}</div>
+                    <div class="small fw-semibold mb-3">Rs. {{ fav.property.price }}</div>
+                    <div class="mt-auto d-flex flex-wrap gap-2">
+                      <a class="btn btn-primary btn-sm" href="{% url 'property_detail' fav.property.id %}?view=compact"><i class="fas fa-eye me-1"></i>View</a>
+                      <form method="post" action="{% url 'toggle_favorite' fav.property.id %}" class="m-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger btn-sm"><i class="fas fa-heart-broken me-1"></i>Remove</button>
+                      </form>
+                    </div>
+                  </div>
+                </article>
+              </div>
+              {% empty %}
+              <div class="col-12">
+                <div class="alert alert-info border-0 mb-0">
+                  <i class="fas fa-info-circle me-2"></i>No saved properties yet.
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="tab-pane fade {% if active_tab == 'bookings' %}show active{% endif %}" id="profile-tab-bookings" role="tabpanel" aria-labelledby="profile-tab-bookings-tab" tabindex="0">
+            <div class="row g-3">
+              <div class="col-12 col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                      <div class="fw-semibold"><i class="fas fa-calendar-check me-2 text-success"></i>Bookings you made</div>
+                      <div class="small text-muted">Latest</div>
+                    </div>
+                    <div class="list-group list-group-flush">
+                      {% for b in recent_bookings_as_tenant %}
+                      <a class="list-group-item list-group-item-action px-0" href="{% url 'property_detail' b.property.id %}?view=compact">
+                        <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+                          <div class="me-auto">
+                            <div class="fw-semibold">{{ b.property.title }}</div>
+                            <div class="small text-muted"><i class="fas fa-clock me-1"></i>{{ b.booked_at|date:"M d, Y H:i" }}</div>
+                          </div>
+                          {% if b.status == 'ACCEPTED' %}
+                          <span class="badge text-bg-success">Accepted</span>
+                          {% elif b.status == 'REJECTED' %}
+                          <span class="badge text-bg-danger">Rejected</span>
+                          {% else %}
+                          <span class="badge text-bg-secondary">Pending</span>
+                          {% endif %}
+                        </div>
+                      </a>
+                      {% empty %}
+                      <div class="text-muted small">No bookings found.</div>
+                      {% endfor %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                      <div class="fw-semibold"><i class="fas fa-inbox me-2 text-primary"></i>Booking requests</div>
+                      <a href="{% url 'notifications' %}" class="btn btn-outline-secondary btn-sm fw-semibold">
+                        <i class="fas fa-bell me-2"></i>Open notifications
+                      </a>
+                    </div>
+                    <div class="list-group list-group-flush">
+                      {% for b in recent_booking_requests %}
+                      <a class="list-group-item list-group-item-action px-0" href="{% url 'property_detail' b.property.id %}?view=compact">
+                        <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+                          <div class="me-auto">
+                            <div class="fw-semibold">{{ b.booked_by.username }} <span class="text-muted fw-normal">booked</span> {{ b.property.title }}</div>
+                            <div class="small text-muted"><i class="fas fa-clock me-1"></i>{{ b.booked_at|date:"M d, Y H:i" }}</div>
+                          </div>
+                          {% if b.status == 'ACCEPTED' %}
+                          <span class="badge text-bg-success">Accepted</span>
+                          {% else %}
+                          <span class="badge text-bg-primary">New</span>
+                          {% endif %}
+                        </div>
+                      </a>
+                      {% empty %}
+                      <div class="text-muted small">No booking requests yet.</div>
+                      {% endfor %}
+                    </div>
+                    <div class="small text-muted mt-3">Tip: Accept/cancel booking requests from the Notifications page.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-pane fade {% if active_tab == 'settings' %}show active{% endif %}" id="profile-tab-settings" role="tabpanel" aria-labelledby="profile-tab-settings-tab" tabindex="0">
+            <form method="post" enctype="multipart/form-data" novalidate class="profile-settings">
+              {% csrf_token %}
+
+              {% if user_form.non_field_errors or profile_form.non_field_errors %}
+              <div class="alert alert-danger" role="alert">
+                {% for error in user_form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+                {% for error in profile_form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+              </div>
+              {% endif %}
+
+              <div class="row g-3 g-lg-4">
+                <div class="col-12 col-lg-4">
+                  <div class="card border-0 bg-light-subtle">
+                    <div class="card-body">
+                      <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h3 class="h6 mb-0"><i class="fas fa-image me-2 text-primary"></i>Profile Photo</h3>
+                        <span class="badge text-bg-light border">PNG/JPG</span>
+                      </div>
+
+                      <div class="d-flex align-items-center gap-3 mb-3">
+                        <img
+                          id="settingsAvatarPreview"
+                          class="rounded-circle border shadow-sm"
+                          style="width: 96px; height: 96px; object-fit: cover;"
+                          src="{% if profile_form.instance.image %}{{ profile_form.instance.image.url }}{% endif %}"
+                          alt="Profile photo preview"
+                        >
+                        <div class="small text-muted">
+                          Click the camera icon on your avatar, or choose a file below.
+                        </div>
+                      </div>
+
+                      <div class="mb-2">
+                        <label for="{{ profile_form.image.id_for_label }}" class="form-label fw-semibold">Upload new photo</label>
+                        {{ profile_form.image }}
+                        {% for error in profile_form.image.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                      </div>
+                      <div class="small text-muted">This photo appears on your listings and bookings.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-lg-8">
+                  <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                      <h3 class="h6 mb-3"><i class="fas fa-user-gear me-2 text-success"></i>Account Details</h3>
+                      <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                          <label for="{{ user_form.first_name.id_for_label }}" class="form-label fw-semibold">First name</label>
+                          {{ user_form.first_name }}
+                          {% for error in user_form.first_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                          <label for="{{ user_form.last_name.id_for_label }}" class="form-label fw-semibold">Last name</label>
+                          {{ user_form.last_name }}
+                          {% for error in user_form.last_name.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                          <label for="{{ user_form.username.id_for_label }}" class="form-label fw-semibold">Username</label>
+                          {{ user_form.username }}
+                          {% for error in user_form.username.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12 col-md-6">
+                          <label class="form-label fw-semibold">User ID</label>
+                          <input type="text" class="form-control" value="{{ user.id }}" disabled>
+                        </div>
+                        <div class="col-12">
+                          <label for="{{ user_form.email.id_for_label }}" class="form-label fw-semibold">Email</label>
+                          {{ user_form.email }}
+                          {% for error in user_form.email.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        </div>
+                        <div class="col-12">
+                          <label for="{{ profile_form.phone_number.id_for_label }}" class="form-label fw-semibold">Phone number</label>
+                          {{ profile_form.phone_number }}
+                          {% for error in profile_form.phone_number.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+                        </div>
+                      </div>
+
+                      <div class="mt-4 d-flex gap-2 flex-wrap">
+                        <button type="submit" class="btn btn-primary btn-lg fw-semibold"><i class="fas fa-save me-2"></i>Save changes</button>
+                        <a href="{% url 'profile' %}" class="btn btn-outline-secondary btn-lg fw-semibold"><i class="fas fa-rotate-left me-2"></i>Reset</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+  <div id="profileToast" class="toast align-items-center text-bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="profileToastBody">Copied</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/profile.js' %}"></script>
 {% endblock %}

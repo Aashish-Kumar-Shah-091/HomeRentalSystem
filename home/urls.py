@@ -28,6 +28,8 @@ urlpatterns = [
     # ===== PROPERTY MANAGEMENT =====
     path('property/', views.add_property, name='property'),  # Add new property listing
     path('properties/', views.property_list, name='properties'),  # Display all properties with filters
+    path('properties/mine/', views.my_properties, name='my_properties'),  # View properties listed by current user
+    path('properties/others/', views.other_properties, name='other_properties'),  # View properties listed by others
     path('properties/<int:property_id>/', views.property_detail, name='property_detail'),  # View property details
     path('properties/<int:property_id>/edit/', views.property_edit, name='property_edit'),  # Edit property
     path('properties/<int:property_id>/delete/', views.property_delete, name='property_delete'),  # Delete property

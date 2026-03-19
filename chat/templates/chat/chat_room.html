@@ -1,0 +1,146 @@
+{% extends "layout_minimal.html" %}
+{% load static %}
+
+{% block title %}Booking Chat{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/chat_room.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="chat-page">
+  <div class="chat-shell">
+    <div class="chat-shell__topbar">
+      <a href="{% url 'home_list' %}" class="chat-shell__backlink">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back</span>
+      </a>
+    </div>
+
+    <div class="chat-shell__body">
+      <section class="chat-room-panel">
+        <header class="chat-room-panel__header">
+          <div class="chat-room-panel__identity">
+            <div class="chat-room-panel__avatar">
+              {% if booking.booked_by_id == user_id %}
+                {{ booking.owner.username|first|upper }}
+              {% else %}
+                {{ booking.booked_by.username|first|upper }}
+              {% endif %}
+            </div>
+
+            <div>
+              <div class="chat-room-panel__title">
+                {% if booking.booked_by_id == user_id %}
+                  {{ booking.owner.username }}
+                {% else %}
+                  {{ booking.booked_by.username }}
+                {% endif %}
+              </div>
+              <div id="chat-status" class="chat-room-panel__status">Connecting...</div>
+            </div>
+          </div>
+
+          <div class="chat-room-panel__chip">
+            <i class="fas fa-house"></i>
+            <span>{{ booking.property.title }}</span>
+          </div>
+        </header>
+
+        <div id="chat-error" class="chat-error" hidden></div>
+
+        <div id="messages" class="chat-history" aria-live="polite">
+          {% for message in chat_messages %}
+            <article
+              class="message {% if message.sender.id == user_id %}you{% else %}other{% endif %}"
+              data-message-id="{{ message.id }}"
+            >
+              {% if message.sender.id != user_id %}
+                <div class="message-avatar">
+                  {{ message.sender.username|first|upper }}
+                </div>
+              {% endif %}
+
+              <div class="message-stack">
+                <div class="message-author">
+                  {% if message.sender.id == user_id %}You{% else %}{{ message.sender.username }}{% endif %}
+                </div>
+                <div class="message-bubble">
+                  {% if message.image %}
+                    <a href="{{ message.image.url }}" class="message-image-link" target="_blank" rel="noopener noreferrer">
+                      <img
+                        src="{{ message.image.url }}"
+                        alt="Shared chat image"
+                        class="message-image"
+                      >
+                    </a>
+                  {% endif %}
+                  {% if message.content %}
+                    <div class="message-text">{{ message.content|linebreaksbr }}</div>
+                  {% endif %}
+                </div>
+                <div class="message-meta">{{ message.created_at|date:"M d, H:i" }}</div>
+              </div>
+            </article>
+          {% empty %}
+            <div id="chat-empty-state" class="chat-empty-state">
+              <div class="chat-empty-state__icon">
+                <i class="fas fa-paper-plane"></i>
+              </div>
+              <h2 class="chat-empty-state__title">No messages yet</h2>
+              <p class="chat-empty-state__text mb-0">
+                Start the conversation with a quick hello, just like Messenger.
+              </p>
+            </div>
+          {% endfor %}
+        </div>
+
+        <footer class="chat-composer">
+          <form id="chat-form" class="chat-form">
+            {% csrf_token %}
+            <label class="visually-hidden" for="chat-input">Message</label>
+            <input
+              type="file"
+              id="chat-image-input"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              hidden
+            >
+            <button type="button" id="chat-image-button" class="chat-attach-button" aria-label="Attach image">
+              <i class="fas fa-image"></i>
+            </button>
+            <div class="chat-form__input-wrap">
+              <i class="fas fa-pen chat-form__input-icon" aria-hidden="true"></i>
+              <input
+                type="text"
+                id="chat-input"
+                placeholder="Type a message..."
+                autocomplete="off"
+                maxlength="1000"
+              >
+            </div>
+            <div id="chat-image-preview" class="chat-image-preview" hidden>
+              <span id="chat-image-name" class="chat-image-preview__name"></span>
+              <button type="button" id="chat-image-clear" class="chat-image-preview__clear" aria-label="Remove selected image">
+                <i class="fas fa-xmark"></i>
+              </button>
+            </div>
+            <button type="submit" id="chat-send" class="chat-send-button">
+              <i class="fas fa-paper-plane"></i>
+              <span>Send</span>
+            </button>
+          </form>
+        </footer>
+      </section>
+    </div>
+  </div>
+</section>
+
+<script>
+  const chatBootstrap = {
+    bookingId: "{{ booking.id }}",
+    userId: "{{ user_id }}",
+    uploadUrl: "{% url 'chat_upload_image' booking.id %}"
+  };
+</script>
+<script src="{% static 'js/chat_room.js' %}"></script>
+{% endblock %}

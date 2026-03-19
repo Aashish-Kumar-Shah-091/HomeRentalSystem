@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>{% block email_title %}Notification{% endblock %}</title>
+    <style>
+      @media (max-width: 620px) {
+        .container { width: 100% !important; }
+        .px { padding-left: 16px !important; padding-right: 16px !important; }
+        .btn { width: 100% !important; }
+      }
+    </style>
+  </head>
+  <body style="margin:0; padding:0; background:#f6f7fb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;">
+    <!-- Preheader (hidden) -->
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;">
+      {% block preheader %}{% endblock %}
+    </div>
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; background:#f6f7fb;">
+      <tr>
+        <td align="center" style="padding:24px 12px;">
+          <table role="presentation" class="container" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px; max-width:600px;">
+            <tr>
+              <td class="px" style="padding:0 24px;">
+                <div style="padding:10px 0 14px 0;">
+                  <div style="font-size:18px; font-weight:800; letter-spacing:.2px; color:#0d6efd;">
+                    {{ site_name|default:"Ghar Setu" }}
+                  </div>
+                  <div style="font-size:12px; color:#6b7280;">
+                    Automated Rental Solution
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="px" style="padding:0 24px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#ffffff; border-radius:16px; overflow:hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.06);">
+                  <tr>
+                    <td style="padding:22px 22px 18px 22px; border-bottom:1px solid #eef0f4;">
+                      <div style="font-size:20px; font-weight:800; color:#111827;">
+                        {% block headline %}Notification{% endblock %}
+                      </div>
+                      {% block subhead %}{% endblock %}
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:18px 22px;">
+                      {% block body %}{% endblock %}
+                    </td>
+                  </tr>
+
+                  {% block cta %}{% endblock %}
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="px" style="padding:16px 24px 0 24px;">
+                <div style="font-size:12px; color:#6b7280; line-height:1.5;">
+                  If you didn’t request this action, you can safely ignore this email.
+                </div>
+                <div style="font-size:12px; color:#9aa1ac; margin-top:8px;">
+                  © {% now "Y" %} {{ site_name|default:"Ghar Setu" }}. All rights reserved.
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+

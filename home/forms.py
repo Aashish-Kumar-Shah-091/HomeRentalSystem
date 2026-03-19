@@ -9,6 +9,7 @@ from .models import home, Property, Profile, Testimonial
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+import re
 
 User = get_user_model()
 
@@ -104,6 +105,8 @@ class PropertyForm(forms.ModelForm):
     Form for creating and editing property listings.
     Collects property details, location, contact info, and images.
     """
+    COORDINATE_LOCATION_RE = re.compile(r"^\s*-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?\s*$")
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Apply Bootstrap styling to all fields
@@ -133,6 +136,12 @@ class PropertyForm(forms.ModelForm):
             'longitude',  # GPS longitude for map
         ]
 
+    def clean_location(self):
+        location = (self.cleaned_data.get("location") or "").strip()
+        if self.COORDINATE_LOCATION_RE.match(location):
+            raise ValidationError("Please enter a location name (not latitude/longitude).")
+        return location
+
 
 class UserUpdateForm(forms.ModelForm):
     """
@@ -158,6 +167,9 @@ class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ["phone_number", "image"]
+        widgets = {
+            "image": forms.FileInput(attrs={"accept": "image/*"}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

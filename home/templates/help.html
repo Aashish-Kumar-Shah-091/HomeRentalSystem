@@ -4,7 +4,7 @@
      Purpose: Provide platform support through contact form, direct contact info, and FAQ section
      Features: Contact form (name, email, subject, message), direct support contact options, searchable FAQ accordion
      For: Users to get help with bookings, listings, account issues, or general inquiries
-     Contact Options: Email, phone, WhatsApp; FAQ search functionality
+     Contact Options: Email, phone; FAQ search functionality
 -->
 
 {% block title %}Contact Support - Ghar Setu{% endblock %}
@@ -205,8 +205,6 @@
                   <option value="email" {% if form_data.preferred_contact == "email" %}selected{% endif %}>Email</option>
                   <!-- Phone call option -->
                   <option value="call" {% if form_data.preferred_contact == "call" %}selected{% endif %}>Phone Call</option>
-                  <!-- WhatsApp option -->
-                  <option value="whatsapp" {% if form_data.preferred_contact == "whatsapp" %}selected{% endif %}>WhatsApp</option>
                 </select>
               </div>
 

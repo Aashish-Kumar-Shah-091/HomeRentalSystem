@@ -4,6 +4,8 @@ This module defines all database models for the home rental application.
 Models include Property listings, User Profiles, Bookings, Favorites, and Testimonials.
 """
 
+import builtins
+
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -99,15 +101,52 @@ class Booking(models.Model):
     Booking model represents a property booking request from a tenant to a property owner.
     Tracks booking status, acceptance, and read status for notifications.
     """
+    class Status(models.TextChoices):
+        PENDING = "PENDING", "Pending"
+        ACCEPTED = "ACCEPTED", "Accepted"
+        REJECTED = "REJECTED", "Rejected"
+
     property = models.ForeignKey(Property, on_delete=models.CASCADE)  # Booked property
     booked_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bookings")  # Tenant who booked
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="owner_bookings")  # Property owner
     booked_at = models.DateTimeField(auto_now_add=True)  # When the booking was made
+    status = models.CharField(
+        max_length=10,
+        choices=Status.choices,
+        default=Status.PENDING,
+    )  # Booking lifecycle status
     is_read = models.BooleanField(default=False)  # Whether owner has seen the booking
     is_accepted = models.BooleanField(default=False)  # Whether owner accepted the booking
 
     def __str__(self):
         return f"{self.booked_by.username} - {self.property.title}"
+
+    @builtins.property
+    def user(self):
+        """Compatibility alias for the tenant field used by chat/business rules."""
+        return self.booked_by
+
+    @builtins.property
+    def room_name(self):
+        """Socket.IO room name for this booking conversation."""
+        return f"booking_{self.pk}"
+
+    @builtins.property
+    def chat_enabled(self):
+        """Chat becomes available only after a booking is accepted."""
+        return self.status == self.Status.ACCEPTED
+
+    def mark_pending(self):
+        self.status = self.Status.PENDING
+        self.is_accepted = False
+
+    def mark_accepted(self):
+        self.status = self.Status.ACCEPTED
+        self.is_accepted = True
+
+    def mark_rejected(self):
+        self.status = self.Status.REJECTED
+        self.is_accepted = False
 
 
 class BookingCancellationNotification(models.Model):
@@ -131,6 +170,13 @@ class BookingAcceptanceNotification(models.Model):
     Records who accepted, which booking was accepted, and when.
     """
     property = models.ForeignKey(Property, on_delete=models.CASCADE)  # The accepted property
+    booking = models.ForeignKey(
+        Booking,
+        on_delete=models.CASCADE,
+        related_name="booking_acceptance_notifications",
+        null=True,
+        blank=True,
+    )  # Accepted booking linked to chat access
     tenant = models.ForeignKey(User, on_delete=models.CASCADE, related_name="acceptance_notifications")  # Tenant whose booking was accepted
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_acceptance_notifications")  # Owner who accepted
     accepted_at = models.DateTimeField(auto_now_add=True)  # When the booking was accepted

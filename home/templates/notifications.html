@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "layout_minimal.html" %}
 
 <!-- Template: Notifications Page
      Purpose: Display all booking-related notifications for the user
@@ -10,19 +10,23 @@
 
 {% block content %}
 <section class="container py-5">
+    {% url 'home_list' as back_fallback %}
     
     <!-- Header section with title and mark all button -->
     <div class="mb-5">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
             
             <!-- Page title with bell icon -->
-            <h1 class="h3 mb-0">
-                <i class="fas fa-bell me-2"></i>Booking Notifications
-            </h1>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                {% include "partials/back_button.html" with fallback_url=back_fallback label="Back" %}
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-bell me-2"></i>Booking Notifications
+                </h1>
+            </div>
             
             <!-- Mark all notifications as read button (only if notifications exist) -->
             {% if notifications %}
-            <form method="post" action="{% url 'mark_all_notifications_read' }}" class="m-0">
+            <form method="post" action="{% url 'mark_all_notifications_read' %}" class="m-0">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-outline-primary fw-semibold">
                     <i class="fas fa-check-double me-2"></i>Mark all as read
@@ -34,24 +38,41 @@
 
     <!-- Loop through each notification -->
     {% for notification in notifications %}
-    <div class="card shadow-sm mb-3 border-left-{{ notification.is_read|yesno:'secondary,primary' }} border-left-4">
+    <div class="card shadow-sm mb-3 border-left-{{ notification.accent|default:'primary' }} border-left-4 {% if not notification.is_read %}notif-card-unread{% endif %}">
         <div class="card-body">
             
             <!-- Notification header: message and status badges -->
             <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-3">
-                <div class="flex-grow-1">
-                    
-                    <!-- Notification message text -->
-                    <p class="mb-2 fs-5">
-                        <i class="fas fa-info-circle me-2 text-{{ notification.is_read|yesno:'secondary,primary' }}"></i>
-                        {{ notification.message }}
-                    </p>
-                    
-                    <!-- Notification timestamp -->
-                    <small class="text-muted">
-                        <i class="fas fa-clock me-1"></i>
-                        {{ notification.created_at|date:"M d, Y H:i" }}
-                    </small>
+                <div class="d-flex gap-3 flex-grow-1">
+                    <span class="notif-icon bg-{{ notification.accent|default:'primary' }}-subtle text-{{ notification.accent|default:'primary' }}-emphasis">
+                        <i class="fas {{ notification.icon|default:'fa-bell' }}"></i>
+                    </span>
+                     
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                            <span class="badge bg-{{ notification.accent|default:'primary' }}-subtle text-{{ notification.accent|default:'primary' }}-emphasis">
+                                {{ notification.type_label|default:"Notification" }}
+                            </span>
+                            {% if not notification.is_read %}
+                            <span class="badge bg-primary">
+                                <i class="fas fa-bolt me-1"></i>New
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Notification message text -->
+                        <p class="mb-2 fs-5">
+                            {{ notification.message }}
+                        </p>
+                         
+                        <!-- Notification timestamp -->
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            {{ notification.created_at|date:"M d, Y H:i" }}
+                            <span class="mx-1">&middot;</span>
+                            {{ notification.created_at|timesince }} ago
+                        </small>
+                    </div>
                 </div>
                 
                 <!-- Status badges (Read/Unread, Accepted) -->
@@ -78,48 +99,49 @@
             </div>
 
             <!-- Action buttons section: varies based on notification type -->
-            
+             
             <!-- For pending booking requests: Accept/Reject buttons -->
-            {% if notification.can_accept and notification.booking_id %}
             <div class="d-flex gap-2 flex-wrap mt-3">
+                {% if notification.property_id %}
+                <a href="{% url 'property_detail' notification.property_id %}" class="btn btn-sm btn-outline-secondary fw-semibold">
+                    <i class="fas fa-up-right-from-square me-1"></i>View property
+                </a>
+                {% endif %}
+
+                {% if notification.can_chat and notification.booking_id %}
+                <a href="{% url 'chat_room' notification.booking_id %}" class="btn btn-sm btn-primary fw-semibold">
+                    <i class="fas fa-comments me-1"></i>{{ notification.chat_label|default:"Chat Now" }}
+                </a>
+                {% endif %}
+                
+                {% if notification.can_accept and notification.booking_id %}
                 <!-- Accept booking button -->
-                <form method="post" action="{% url 'accept_booking' notification.booking_id }}" class="m-0">
+                <form method="post" action="{% url 'accept_booking' notification.booking_id %}" class="m-0">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-success fw-semibold">
                         <i class="fas fa-check me-1"></i>Accept Booking
                     </button>
                 </form>
-                
+                 
                 <!-- Reject booking button -->
-                <form method="post" action="{% url 'cancel_booking' notification.booking_id }}" class="m-0">
+                <form method="post" action="{% url 'cancel_booking' notification.booking_id %}" class="m-0">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-danger fw-semibold">
                         <i class="fas fa-times me-1"></i>Reject Booking
                     </button>
                 </form>
-            </div>
-            
+             
             <!-- For confirmed bookings: Cancel button -->
             {% elif notification.can_cancel and notification.booking_id %}
-            <div class="d-flex gap-2 flex-wrap mt-3">
                 <!-- Cancel booking button (for owners) -->
-                <form method="post" action="{% url 'cancel_booking' notification.booking_id }}" class="m-0">
+                <form method="post" action="{% url 'cancel_booking' notification.booking_id %}" class="m-0">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-danger fw-semibold">
                         <i class="fas fa-ban me-1"></i>Cancel Booking
                     </button>
                 </form>
-            </div>
-            
-            <!-- For accepted bookings: WhatsApp contact button -->
-            {% elif notification.whatsapp_url %}
-            <div class="d-flex gap-2 flex-wrap mt-3">
-                <!-- Open WhatsApp chat with property owner -->
-                <a href="{{ notification.whatsapp_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-success fw-semibold">
-                    <i class="fab fa-whatsapp me-1"></i>Chat on WhatsApp
-                </a>
-            </div>
             {% endif %}
+            </div>
         </div>
     </div>
     
@@ -133,18 +155,4 @@
     {% endfor %}
 </section>
 
-<style>
-  /* Left border styling for notification cards */
-  .border-left-4 {
-    border-left: 4px solid !important;
-  }
-  
-  .border-left-primary {
-    border-left-color: #0d6efd !important;
-  }
-  
-  .border-left-secondary {
-    border-left-color: #6c757d !important;
-  }
-</style>
 {% endblock %}

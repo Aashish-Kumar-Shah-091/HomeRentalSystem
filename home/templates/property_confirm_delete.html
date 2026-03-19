@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "layout_minimal.html" %}
 
 {% block title %}
 Delete Property
@@ -32,7 +32,7 @@ Delete Property
               <button type="submit" class="btn btn-danger btn-lg fw-semibold">
                 <i class="fas fa-check me-2"></i>Yes, Delete
               </button>
-              <a href="{% url 'properties' %}" class="btn btn-outline-secondary btn-lg fw-semibold">
+              <a href="{% url 'my_properties' %}" class="btn btn-outline-secondary btn-lg fw-semibold">
                 <i class="fas fa-times me-2"></i>Cancel
               </a>
             </div>

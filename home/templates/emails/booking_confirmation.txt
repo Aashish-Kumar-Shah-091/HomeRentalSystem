@@ -1,0 +1,20 @@
+Booking Confirmation
+
+Hi {{ customer_name }},
+
+Thanks for your booking request. We’ve notified the property owner. You’ll get another email once it’s accepted or canceled.
+
+Booking details
+- Booking ID: #{{ booking_id }}
+- Requested on: {{ booking_date }}
+- Status: {{ booking_status }}
+- Property: {{ property_title }}
+- Location: {{ property_location }}
+- Type: {{ property_type }}
+- Total amount: {{ total_amount }}
+
+View property:
+{{ property_url }}
+
+— {{ site_name|default:"Ghar Setu" }}
+

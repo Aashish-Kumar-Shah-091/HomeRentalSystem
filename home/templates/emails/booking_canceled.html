@@ -1,0 +1,77 @@
+{% extends "emails/base.html" %}
+
+{% block email_title %}Booking Cancellation{% endblock %}
+
+{% block preheader %}
+Your booking #{{ booking_id }} has been canceled.
+{% endblock %}
+
+{% block headline %}Booking Cancellation{% endblock %}
+
+{% block subhead %}
+<div style="margin-top:6px; font-size:13px; color:#6b7280;">
+  Booking <strong>#{{ booking_id }}</strong> • <span style="font-weight:700; color:#111827;">{{ booking_status }}</span>
+</div>
+{% endblock %}
+
+{% block body %}
+<div style="font-size:14px; color:#111827; line-height:1.6;">
+  <p style="margin:0 0 12px 0;">Hi {{ customer_name }},</p>
+  <p style="margin:0 0 12px 0;">
+    Your booking has been canceled.
+  </p>
+
+  <div style="margin:16px 0; padding:14px; background:#fef2f2; border:1px solid #fee2e2; border-radius:12px;">
+    <div style="font-weight:800; margin:0 0 8px 0;">Cancellation reason</div>
+    <div>{{ cancellation_reason }}</div>
+  </div>
+
+  <div style="margin:16px 0; padding:14px; background:#f9fafb; border:1px solid #eef0f4; border-radius:12px;">
+    <div style="font-weight:800; margin:0 0 10px 0;">Booking details</div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size:14px;">
+      <tr>
+        <td style="padding:6px 0; color:#6b7280;">Booking ID</td>
+        <td style="padding:6px 0; text-align:right; font-weight:700;">#{{ booking_id }}</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0; color:#6b7280;">Canceled on</td>
+        <td style="padding:6px 0; text-align:right; font-weight:700;">{{ canceled_date }}</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0; color:#6b7280;">Property</td>
+        <td style="padding:6px 0; text-align:right; font-weight:700;">{{ property_title }}</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0; color:#6b7280;">Location</td>
+        <td style="padding:6px 0; text-align:right; font-weight:700;">{{ property_location }}</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0; color:#6b7280;">Total amount</td>
+        <td style="padding:6px 0; text-align:right; font-weight:700;">{{ total_amount }}</td>
+      </tr>
+    </table>
+  </div>
+
+  <div style="margin:16px 0; padding:14px; background:#fff7ed; border:1px solid #ffedd5; border-radius:12px;">
+    <div style="font-weight:800; margin:0 0 8px 0;">Refund details</div>
+    <div>{{ refund_details }}</div>
+  </div>
+
+  <p style="margin:0;">
+    You can browse other available properties here:<br>
+    <a href="{{ properties_url }}" style="color:#0d6efd; word-break:break-all;">{{ properties_url }}</a>
+  </p>
+</div>
+{% endblock %}
+
+{% block cta %}
+<tr>
+  <td style="padding:0 22px 22px 22px;">
+    <a class="btn" href="{{ properties_url }}" target="_blank" rel="noopener noreferrer"
+       style="display:inline-block; background:#0d6efd; color:#ffffff; text-decoration:none; font-weight:800; padding:12px 16px; border-radius:12px;">
+      Browse properties
+    </a>
+  </td>
+</tr>
+{% endblock %}
+

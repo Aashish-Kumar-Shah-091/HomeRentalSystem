@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "layout_minimal.html" %}
 
 {% block title %}{{ property.title }}{% endblock %}
 
@@ -173,6 +173,7 @@
 
 {% block content %}
 <section class="container py-4 py-lg-5">
+    {% url 'properties' as back_fallback %}
 
     <div class="row justify-content-center">
         <div class="col-lg-8">
@@ -180,7 +181,8 @@
             <article class="card shadow-sm property-detail-card">
 
                 <div class="card-header bg-info text-white py-3 property-header">
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        {% include "partials/back_button.html" with fallback_url=back_fallback label="Back" btn_class="btn btn-light btn-sm fw-semibold" %}
                         <i class="fas fa-building"></i>
                         <h1 class="h5 mb-0">{{ property.title }}</h1>
                     </div>
@@ -407,23 +409,14 @@
                     {% if booked_tenants %}
 
                     <ul class="list-group list-group-flush">
-
                         {% for tenant in booked_tenants %}
-
                         <li class="list-group-item">
-
-                            <a href="{% url 'tenant_profile' tenant.id %}"
-                               class="text-decoration-none">
-
-                                <i class="fas fa-user-circle me-2"></i>
+                            <a href="{% url 'tenant_profile' tenant.id %}" class="fw-semibold text-decoration-none">
+                                <i class="fas fa-user-circle text-primary me-2"></i>
                                 {{ tenant.username }}
-
                             </a>
-
                         </li>
-
                         {% endfor %}
-
                     </ul>
 
                     {% else %}

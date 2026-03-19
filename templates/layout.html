@@ -8,11 +8,34 @@
   Responsive: Mobile-friendly with hamburger menu toggle on small screens
 -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 <head>
 <!-- Meta tags and page meta information -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  (function () {
+    const storageKey = "gharsetu-theme";
+    const root = document.documentElement;
+    let theme = "light";
+
+    try {
+      const savedTheme = localStorage.getItem(storageKey);
+      if (savedTheme === "light" || savedTheme === "dark") {
+        theme = savedTheme;
+      } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        theme = "dark";
+      }
+    } catch (error) {
+      if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        theme = "dark";
+      }
+    }
+
+    root.setAttribute("data-bs-theme", theme);
+  }());
+</script>
 
 <!-- Dynamic page title block - overridden by child templates -->
 <title>{% block title %}Ghar Setu{% endblock %}</title>
@@ -24,6 +47,9 @@
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
+<!-- Site styles: small UI enhancements (notifications, etc.) -->
+<link rel="stylesheet" href="{% static 'css/site.css' %}">
+
 <!-- Leaflet.js for interactive map displays (property location, property search) -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -32,10 +58,11 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 {% block extra_head %}{% endblock %}
 </head>
 
-<body class="bg-light d-flex flex-column min-vh-100">
+<body class="site-shell d-flex flex-column min-vh-100">
 
+{% block header %}
 <!-- NAVIGATION BAR: Fixed top navbar with site branding, main navigation, and user controls -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom fixed-top">
+<nav class="navbar navbar-expand-lg border-bottom fixed-top site-navbar">
 <div class="container">
 
   <!-- Brand/Logo: Links to homepage -->
@@ -63,10 +90,10 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
         <a class="nav-link" href="{% url 'home_list' %}">Home</a>
       </li>
 
-      <!-- Properties link - browse all listings -->
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'properties' %}">Properties</a>
-      </li>
+       <!-- Properties link - browse all listings -->
+       <li class="nav-item">
+         <a class="nav-link" href="{% url 'properties' %}">Properties</a>
+       </li>
 
       <!-- About page link -->
       <li class="nav-item">
@@ -83,84 +110,218 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
     <!-- Right-aligned navbar items: Notifications (for authenticated users) and User menu -->
     <ul class="navbar-nav ms-auto align-items-center">
 
+      <li class="nav-item me-2">
+        <button
+          type="button"
+          id="theme-toggle"
+          class="btn btn-sm site-theme-toggle"
+          aria-label="Toggle dark mode"
+          aria-pressed="false">
+          <i id="theme-toggle-icon" class="fas fa-moon"></i>
+          <span id="theme-toggle-label">Dark</span>
+        </button>
+      </li>
+
       {% if request.user.is_authenticated %}
+
+      <!-- MESSAGES DROPDOWN: Shows recent chat conversations and unread message count -->
+      <li class="nav-item dropdown me-2">
+
+        <a class="nav-link position-relative"
+        data-bs-toggle="dropdown"
+        href="#"
+        role="button"
+        aria-expanded="false"
+        aria-label="Messages">
+          <i class="fas fa-comment-dots"></i>
+
+          {% if unread_chat_count > 0 %}
+          <span class="notif-pulse"></span>
+          <span class="badge bg-danger position-absolute top-0 start-100 translate-middle notif-count-badge">
+            {{ unread_chat_count }}
+          </span>
+          {% endif %}
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end shadow notif-dropdown p-0">
+          <li class="px-3 py-2 border-bottom">
+            <div class="d-flex align-items-center justify-content-between gap-2">
+              <div class="d-flex align-items-center gap-2">
+                <i class="fas fa-comment-dots text-primary"></i>
+                <span class="fw-semibold">Messages</span>
+                {% if unread_chat_count > 0 %}
+                <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis">
+                  {{ unread_chat_count }} new
+                </span>
+                {% endif %}
+              </div>
+            </div>
+          </li>
+
+          <li class="notif-scroll">
+            <div class="list-group list-group-flush">
+              {% for chat in recent_chats %}
+              <a class="list-group-item list-group-item-action border-0 d-flex gap-2 align-items-start notif-item {% if chat.is_unread %}notif-unread{% endif %}"
+              href="{{ chat.url }}">
+                <span class="notif-icon bg-primary-subtle text-primary-emphasis">
+                  <i class="fas fa-message"></i>
+                </span>
+
+                <div class="flex-grow-1 min-w-0">
+                  <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div class="message-dropdown-title {% if chat.is_unread %}fw-semibold{% endif %}">
+                      {{ chat.counterpart_name }}
+                    </div>
+                    <div class="small text-muted text-nowrap">
+                      {{ chat.created_at|timesince }} ago
+                    </div>
+                  </div>
+                  <div class="notif-message {% if chat.is_unread %}fw-semibold{% endif %}">
+                    {{ chat.preview }}
+                  </div>
+                  <div class="message-dropdown-subtitle">
+                    {{ chat.property_title }}
+                  </div>
+                </div>
+
+                {% if chat.is_unread %}
+                <span class="notif-dot bg-primary"></span>
+                {% endif %}
+              </a>
+              {% empty %}
+              <div class="px-3 py-4 text-center text-muted">
+                <i class="fas fa-comments mb-2" style="font-size: 1.4rem;"></i>
+                <div class="fw-semibold">No messages yet</div>
+                <div class="small">Accepted booking chats will show up here.</div>
+              </div>
+              {% endfor %}
+            </div>
+          </li>
+
+          <li class="border-top">
+            {% if recent_chats %}
+            <a class="dropdown-item text-center py-2"
+            href="{{ recent_chats.0.url }}">
+              Open latest chat
+            </a>
+            {% else %}
+            <span class="dropdown-item text-center py-2 text-muted">
+              No chats yet
+            </span>
+            {% endif %}
+          </li>
+        </ul>
+      </li>
 
       <!-- NOTIFICATIONS DROPDOWN: Shows recent booking notifications -->
       <li class="nav-item dropdown me-2">
-
+ 
         <!-- Bell icon with unread notification count badge -->
         <a class="nav-link position-relative"
         data-bs-toggle="dropdown"
-        href="#">
+        href="#"
+        role="button"
+        aria-expanded="false"
+        aria-label="Notifications">
           <i class="fas fa-bell"></i>
-          
-          <!-- Red badge showing number of unread notifications -->
+           
+          <!-- Pulse + badge showing number of unread notifications -->
           {% if unread_notifications_count > 0 %}
-          <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">
+          <span class="notif-pulse"></span>
+          <span class="badge bg-danger position-absolute top-0 start-100 translate-middle notif-count-badge">
             {{ unread_notifications_count }}
           </span>
           {% endif %}
         </a>
 
         <!-- Dropdown menu with recent notifications -->
-        <ul class="dropdown-menu dropdown-menu-end shadow">
-
-          <!-- Dropdown header with title and mark all button -->
-          <li class="dropdown-header d-flex justify-content-between">
-            <span>Notifications</span>
-            
-            <!-- Mark all notifications as read button -->
-            {% if recent_notifications %}
-            <form method="post" action="{% url 'mark_all_notifications_read' %}">
-              {% csrf_token %}
-              <button class="btn btn-sm btn-link">Mark all</button>
-            </form>
-            {% endif %}
+        <ul class="dropdown-menu dropdown-menu-end shadow notif-dropdown p-0">
+ 
+          <!-- Header -->
+          <li class="px-3 py-2 border-bottom">
+            <div class="d-flex align-items-center justify-content-between gap-2">
+              <div class="d-flex align-items-center gap-2">
+                <i class="fas fa-bell text-primary"></i>
+                <span class="fw-semibold">Notifications</span>
+                {% if unread_notifications_count > 0 %}
+                <span class="badge rounded-pill bg-primary-subtle text-primary-emphasis">
+                  {{ unread_notifications_count }} new
+                </span>
+                {% endif %}
+              </div>
+  
+              <!-- Mark all notifications as read button -->
+              {% if unread_notifications_count > 0 %}
+              <form method="post" action="{% url 'mark_all_notifications_read' %}" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-primary">
+                  <i class="fas fa-check-double me-1"></i>Mark all
+                </button>
+              </form>
+              {% endif %}
+            </div>
           </li>
-
-          <!-- Loop through most recent notifications (populated by context_processors.py) -->
-          {% for notification in recent_notifications %}
-
-          <!-- Individual notification item - links to notification details -->
-          <li>
-            <a class="dropdown-item {% if not notification.is_read %}fw-bold{% endif %}"
-            href="{{ notification.url }}">
-              {{ notification.message }} <br>
-              <!-- Timestamp of notification -->
-              <small class="text-muted">
-                {{ notification.created_at|date:"M d, Y H:i" }}
-              </small>
-            </a>
+ 
+          <!-- Recent notifications -->
+          <li class="notif-scroll">
+            <div class="list-group list-group-flush">
+              {% for notification in recent_notifications %}
+              <a class="list-group-item list-group-item-action border-0 d-flex gap-2 align-items-start notif-item {% if not notification.is_read %}notif-unread{% endif %}"
+              href="{{ notification.url }}">
+                <span class="notif-icon bg-{{ notification.accent }}-subtle text-{{ notification.accent }}-emphasis">
+                  <i class="fas {{ notification.icon }}"></i>
+                </span>
+  
+                <div class="flex-grow-1">
+                  <div class="small text-uppercase text-muted fw-semibold mb-1">
+                    {{ notification.type_label }}
+                  </div>
+                  <div class="notif-message {% if not notification.is_read %}fw-semibold{% endif %}">
+                    {{ notification.message }}
+                  </div>
+                  <div class="small text-muted mt-1">
+                    {{ notification.created_at|timesince }} ago
+                  </div>
+                </div>
+  
+                {% if not notification.is_read %}
+                <span class="notif-dot bg-{{ notification.accent }}"></span>
+                {% endif %}
+              </a>
+              {% empty %}
+              <div class="px-3 py-4 text-center text-muted">
+                <i class="fas fa-inbox mb-2" style="font-size: 1.4rem;"></i>
+                <div class="fw-semibold">No notifications</div>
+                <div class="small">You're all caught up.</div>
+              </div>
+              {% endfor %}
+            </div>
           </li>
-
-          {% empty %}
-
-          <!-- Empty state when no notifications -->
-          <li>
-            <span class="dropdown-item-text text-muted">
-              No notifications
-            </span>
-          </li>
-
-          {% endfor %}
-
-          <!-- Divider separator -->
-          <li><hr class="dropdown-divider"></li>
-
+ 
           <!-- View all notifications link - goes to notifications page -->
-          <li>
-            <a class="dropdown-item text-center"
+          <li class="border-top">
+            <a class="dropdown-item text-center py-2"
             href="{% url 'notifications' %}">
               View all
             </a>
           </li>
-
+ 
         </ul>
       </li>
 
       {% endif %}
 
-      <!-- USER MENU DROPDOWN: Profile, saved properties, logout/login/register -->
+      {% if user.is_authenticated %}
+      <!-- PROFILE LINK: Clicking the user icon now opens the signed-in user's profile page directly. -->
+      <li class="nav-item">
+        <a class="nav-link"
+        href="{% url 'profile' %}"
+        aria-label="Profile">
+          <i class="fas fa-user-circle"></i>
+        </a>
+      </li>
+      {% else %}
+      <!-- USER MENU DROPDOWN: Login/register options for guests -->
       <li class="nav-item dropdown">
 
         <!-- User icon trigger for dropdown -->
@@ -170,45 +331,8 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
           <i class="fas fa-user-circle"></i>
         </a>
 
-        <!-- Dropdown menu with authenticated and unauthenticated options -->
+        <!-- Dropdown menu with unauthenticated options -->
         <ul class="dropdown-menu dropdown-menu-end shadow">
-
-          {% if user.is_authenticated %}
-
-          <!-- User info header: Shows username and email -->
-          <li class="px-3 py-2">
-            <strong>{{ user.username }}</strong><br>
-            <small class="text-muted">{{ user.email }}</small>
-          </li>
-
-          <!-- Divider between header and menu items -->
-          <li><hr class="dropdown-divider"></li>
-
-          <!-- Profile page link - edit user profile -->
-          <li>
-            <a class="dropdown-item" href="{% url 'profile' %}">
-              Profile
-            </a>
-          </li>
-
-          <!-- Saved properties link - view favorite properties -->
-          <li>
-            <a class="dropdown-item" href="{% url 'favorite_list' %}">
-              Saved Properties
-            </a>
-          </li>
-
-          <!-- Logout button - POST form to logout -->
-          <li>
-            <form method="post" action="{% url 'logout' %}" class="px-3">
-              {% csrf_token %}
-              <button class="btn btn-outline-danger btn-sm w-100">
-                Logout
-              </button>
-            </form>
-          </li>
-
-          {% else %}
 
           <!-- Login link for unauthenticated users -->
           <li>
@@ -224,11 +348,10 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
             </a>
           </li>
 
-          {% endif %}
-
         </ul>
 
       </li>
+      {% endif %}
 
     </ul>
 
@@ -238,6 +361,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
 <!-- Spacer div: Compensates for fixed navbar (approximately 70px height) -->
 <div style="height:70px;"></div>
+{% endblock %}
 
 <!-- Optional hero section block for pages that need one (e.g., homepage) -->
 {% block hero %}{% endblock %}
@@ -246,8 +370,10 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 <main class="flex-grow-1">
   {% block content %}{% endblock %}
 </main>
+
+{% block footer %}
 <!-- FOOTER: Site footer with links, company info, and contact details -->
-<footer class="bg-white border-top mt-5">
+<footer class="site-footer border-top mt-5">
 
 <div class="container py-5">
 
@@ -350,13 +476,15 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
 <!-- Footer bottom: Copyright notice -->
 <div class="text-center border-top py-3 small text-muted">
-  © 2026 Ghar Setu. All rights reserved.
+  &copy; 2026 Ghar Setu. All rights reserved.
 </div>
 
 </footer>
+{% endblock %}
 
 <!-- Bootstrap 5 JavaScript bundle for interactive components (modals, dropdowns, etc.) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/theme_toggle.js' %}"></script>
 
 <!-- Block for page-specific JavaScript (filled by child templates) -->
 {% block extra_scripts %}{% endblock %}
