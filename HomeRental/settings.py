@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'channels',  # Django Channels for WebSocket support
     'chat',  # Accepted-booking chat app
     'home',  # Our home rental app
+    'bookings.apps.BookingsConfig',  # Signal-driven booking notifications
 ]
 
 # ===== MIDDLEWARE CONFIGURATION =====
@@ -177,37 +178,17 @@ LOGOUT_REDIRECT_URL = '/home/'  # URL to redirect to after logout
 
 
 # ===== EMAIL CONFIGURATION =====
-# Uses Django's built-in email backend (SMTP). If EMAIL_HOST is not set,
-# emails are printed to the console (useful for development).
-#
-# Configure via environment variables (examples):
-# - Gmail SMTP:
-#   EMAIL_HOST=smtp.gmail.com
-#   EMAIL_PORT=587
-#   EMAIL_USE_TLS=1
-#   EMAIL_HOST_USER=you@gmail.com
-#   EMAIL_HOST_PASSWORD=your_app_password
-# - SendGrid SMTP:
-#   EMAIL_HOST=smtp.sendgrid.net
-#   EMAIL_PORT=587
-#   EMAIL_USE_TLS=1
-#   EMAIL_HOST_USER=apikey
-#   EMAIL_HOST_PASSWORD=your_sendgrid_api_key
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "").strip()
+# Gmail SMTP configuration. Store credentials in environment variables and use an
+# app password for Gmail accounts rather than a personal password.
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com").strip()
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "").strip()
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "").strip()
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1").lower() not in ("0", "false", "no")
 EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "0").lower() in ("1", "true", "yes")
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", "10"))
-
 DEFAULT_FROM_EMAIL = os.environ.get(
     "DEFAULT_FROM_EMAIL",
-    "Ghar Setu <no-reply@gharsetu.local>",
+    EMAIL_HOST_USER or "no-reply@gharsetu.local",
 )
-
-if EMAIL_HOST:
-    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-else:
-    # Safe default for local development (prints emails to the console)
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

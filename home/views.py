@@ -24,11 +24,6 @@ from .forms import (
     ProfileUpdateForm,
     TestimonialForm,
 )
-from .email_notifications import (
-    send_booking_accepted_email,
-    send_booking_canceled_email,
-    send_booking_confirmation_email,
-)
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, get_user_model
 from django.contrib import messages
@@ -653,9 +648,6 @@ def book_property(request, property_id):
         booking.mark_pending()
         booking.save(update_fields=["status", "is_accepted", "is_read", "booked_at"])
 
-        # Email customer a confirmation (won't block booking creation if it fails)
-        send_booking_confirmation_email(request, booking)
-
     return redirect('properties')
 
 @login_required
@@ -801,23 +793,6 @@ def cancel_booking(request, booking_id):
         owner=booking.owner,
     )
 
-    cancellation_reason = (
-        "The property owner canceled your accepted booking."
-        if booking.is_accepted
-        else "The property owner rejected your booking request."
-    )
-    refund_details = (
-        "No payment is collected through Ghar Setu, so refunds are not processed here. "
-        "If you made a payment directly to the owner, please contact them for next steps."
-    )
-
-    # Email tenant about cancellation (best-effort)
-    send_booking_canceled_email(
-        request,
-        booking,
-        cancellation_reason=cancellation_reason,
-        refund_details=refund_details,
-    )
     booking.mark_rejected()
     booking.save(update_fields=["status", "is_accepted"])
     return redirect(request.META.get('HTTP_REFERER', 'properties'))
@@ -857,9 +832,6 @@ def accept_booking(request, booking_id):
     # Mark booking as accepted
     booking.mark_accepted()
     booking.save(update_fields=["status", "is_accepted"])
-
-    # Email tenant with acceptance confirmation (best-effort)
-    send_booking_accepted_email(request, booking)
     return redirect(request.META.get('HTTP_REFERER', 'notifications'))
 
 
