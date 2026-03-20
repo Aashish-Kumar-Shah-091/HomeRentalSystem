@@ -138,6 +138,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const bubble = document.createElement("div");
         bubble.className = "message-bubble";
+        if (data.image_url && !data.content) {
+            bubble.classList.add("message-bubble--image-only");
+        }
 
         if (data.image_url) {
             const imageLink = document.createElement("a");

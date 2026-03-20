@@ -51,7 +51,6 @@ INSTALLED_APPS = [
     'channels',  # Django Channels for WebSocket support
     'chat',  # Accepted-booking chat app
     'home',  # Our home rental app
-    'bookings.apps.BookingsConfig',  # Signal-driven booking notifications
 ]
 
 # ===== MIDDLEWARE CONFIGURATION =====
@@ -175,20 +174,3 @@ LOGIN_URL = '/accounts/login'  # URL to redirect to for login
 
 LOGIN_REDIRECT_URL = '/home/'  # URL to redirect to after successful login
 LOGOUT_REDIRECT_URL = '/home/'  # URL to redirect to after logout
-
-
-# ===== EMAIL CONFIGURATION =====
-# Gmail SMTP configuration. Store credentials in environment variables and use an
-# app password for Gmail accounts rather than a personal password.
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com").strip()
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "").strip()
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "").strip()
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1").lower() not in ("0", "false", "no")
-EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "0").lower() in ("1", "true", "yes")
-EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", "10"))
-DEFAULT_FROM_EMAIL = os.environ.get(
-    "DEFAULT_FROM_EMAIL",
-    EMAIL_HOST_USER or "no-reply@gharsetu.local",
-)
