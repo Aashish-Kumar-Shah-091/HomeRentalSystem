@@ -30,6 +30,11 @@ NOTIFICATION_META = {
         "icon": "fa-circle-check",
         "type_label": "Accepted",
     },
+    "payment_received": {
+        "accent": "success",
+        "icon": "fa-wallet",
+        "type_label": "Payment",
+    },
 }
 
 ACCEPTED_CHAT_NOTIFICATION_MESSAGE = "Your booking has been accepted. You can now chat with the owner."
@@ -59,6 +64,8 @@ def unread_notifications_count(request):
             "recent_chats": [],
         }
 
+    from payments.models import Transaction
+
     # ===== FETCH NOTIFICATIONS FOR CURRENT USER =====
 
     owner_unread_count = Booking.objects.filter(
@@ -72,6 +79,12 @@ def unread_notifications_count(request):
     ).count()
     tenant_accepted_unread_count = BookingAcceptanceNotification.objects.filter(
         tenant=request.user, is_read=False
+    ).count()
+    owner_payment_unread_count = Transaction.objects.filter(
+        booking__owner=request.user,
+        status=Transaction.Status.COMPLETED,
+        owner_is_read=False,
+        completed_at__isnull=False,
     ).count()
 
     from chat.models import ChatMessage
@@ -108,6 +121,15 @@ def unread_notifications_count(request):
         BookingAcceptanceNotification.objects.filter(tenant=request.user)
         .select_related("owner", "property")
         .order_by("-accepted_at")[:10]
+    )
+    owner_payment_recent_qs = (
+        Transaction.objects.filter(
+            booking__owner=request.user,
+            status=Transaction.Status.COMPLETED,
+            completed_at__isnull=False,
+        )
+        .select_related("booking__booked_by", "booking__property")
+        .order_by("-completed_at")[:10]
     )
 
     # ===== FORMAT OWNER NOTIFICATIONS =====
@@ -148,11 +170,22 @@ def unread_notifications_count(request):
         }
         for item in tenant_accepted_recent_qs
     ]
+    owner_payment_recent = [
+        {
+            "kind": "payment_received",
+            "message": f"{item.booking.booked_by.username} paid Rs. {item.amount} for {item.booking.property.title}",
+            "url": reverse("notifications"),
+            "created_at": item.completed_at,
+            "is_read": item.owner_is_read,
+            **NOTIFICATION_META["payment_received"],
+        }
+        for item in owner_payment_recent_qs
+    ]
 
     # ===== COMBINE AND SORT NOTIFICATIONS =====
     # Merge all notification types and sort by date (newest first)
     recent = sorted(
-        owner_recent + tenant_recent + tenant_accepted_recent,
+        owner_recent + tenant_recent + tenant_accepted_recent + owner_payment_recent,
         key=lambda n: n["created_at"],
         reverse=True,
     )[:5]  # Keep only 5 most recent notifications for display
@@ -184,7 +217,12 @@ def unread_notifications_count(request):
             break
     
     # Count total unread notifications across all types
-    count = owner_unread_count + tenant_canceled_unread_count + tenant_accepted_unread_count
+    count = (
+        owner_unread_count
+        + tenant_canceled_unread_count
+        + tenant_accepted_unread_count
+        + owner_payment_unread_count
+    )
 
     # Return context data to be available in all templates
     return {
