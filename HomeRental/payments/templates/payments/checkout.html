@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-success text-white py-3">
+          <h1 class="h4 mb-0">Checkout With eSewa</h1>
+        </div>
+        <div class="card-body p-4">
+          <div class="mb-4 p-3 rounded bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="fw-semibold">Product</span>
+              <span>{{ product_name }}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-2">
+              <span class="fw-semibold">Amount</span>
+              <span>Rs. {{ amount }}</span>
+            </div>
+          </div>
+
+          {% if error_message %}
+          <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+          </div>
+          {% endif %}
+
+          <form method="post" action="{% url 'payments:checkout' %}" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="product_name" value="{{ product_name }}">
+            <input type="hidden" name="amount" value="{{ amount }}">
+            {% if booking_id %}
+            <input type="hidden" name="booking_id" value="{{ booking_id }}">
+            {% endif %}
+
+            <div class="mb-3">
+              <label for="name" class="form-label fw-semibold">Full Name</label>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                name="name"
+                value="{{ form_data.name|default:'' }}"
+                placeholder="Enter your full name"
+                required>
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label fw-semibold">Email Address</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                name="email"
+                value="{{ form_data.email|default:'' }}"
+                placeholder="Enter your email address"
+                required>
+            </div>
+
+            <div class="mb-4">
+              <label for="phone" class="form-label fw-semibold">Phone Number</label>
+              <input
+                type="text"
+                class="form-control"
+                id="phone"
+                name="phone"
+                value="{{ form_data.phone|default:'' }}"
+                placeholder="Enter your phone number"
+                required>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100 fw-semibold">
+              Proceed To eSewa
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

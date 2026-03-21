@@ -36,6 +36,12 @@
     box-shadow: 0 8px 24px rgba(16, 28, 44, 0.08);
   }
 
+  .contact-details-card {
+    background: #ffffff;
+    border-color: #dbe4ef;
+    color: #1f2a37;
+  }
+
   .contact-info-item {
     border: 1px solid #e4ebf5;
     border-radius: 0.8rem;
@@ -61,6 +67,39 @@
 
   .copy-btn {
     white-space: nowrap;
+  }
+
+  [data-bs-theme="dark"] .contact-details-card {
+    background: linear-gradient(135deg, #16202b 0%, #223346 100%);
+    border-color: #223346;
+    color: #f7fbff;
+  }
+
+  [data-bs-theme="dark"] .contact-details-card .text-muted {
+    color: rgba(247, 251, 255, 0.72) !important;
+  }
+
+  [data-bs-theme="dark"] .contact-details-card .contact-info-item {
+    border-color: rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.08);
+    color: #f7fbff;
+  }
+
+  [data-bs-theme="dark"] .contact-details-card .copy-btn,
+  [data-bs-theme="dark"] .contact-details-card .btn-outline-primary {
+    border-color: rgba(255, 255, 255, 0.45);
+    color: #f7fbff;
+  }
+
+  [data-bs-theme="dark"] .contact-details-card .copy-btn:hover,
+  [data-bs-theme="dark"] .contact-details-card .btn-outline-primary:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.7);
+    color: #ffffff;
+  }
+
+  [data-bs-theme="dark"] .contact-details-card hr {
+    border-color: rgba(255, 255, 255, 0.16);
   }
 </style>
 {% endblock %}
@@ -96,7 +135,7 @@
     
     <!-- LEFT COLUMN: Contact details and images -->
     <div class="col-12 col-lg-5">
-      <div class="card contact-card h-100">
+      <div class="card contact-card contact-details-card h-100">
         <div class="card-body p-4">
           <!-- Section title -->
           <h2 class="h4 fw-bold mb-3">Contact Details</h2>

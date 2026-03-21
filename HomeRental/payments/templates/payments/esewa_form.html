@@ -1,0 +1,50 @@
+{% extends "layout_minimal.html" %}
+
+{% block title %}Redirecting To eSewa{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="card shadow-sm border-0 text-center">
+        <div class="card-body p-5">
+          <div class="spinner-border text-success mb-3" role="status" aria-hidden="true"></div>
+          <h1 class="h4 mb-3">Redirecting To eSewa</h1>
+          <p class="text-muted mb-4">
+            Please wait while we securely redirect you to the eSewa payment gateway.
+          </p>
+
+          <div class="rounded bg-light p-3 text-start mb-4">
+            <div class="d-flex justify-content-between">
+              <span class="fw-semibold">Transaction ID</span>
+              <span>{{ transaction.product_id }}</span>
+            </div>
+            <div class="d-flex justify-content-between mt-2">
+              <span class="fw-semibold">Amount</span>
+              <span>Rs. {{ transaction.amount }}</span>
+            </div>
+          </div>
+
+          <form id="esewaForm" action="{{ payment_data.gateway_url }}" method="post">
+            {% for key, value in payment_data.items %}
+              {% if key != "gateway_url" %}
+              <input type="hidden" name="{{ key }}" value="{{ value }}">
+              {% endif %}
+            {% endfor %}
+
+            <button type="submit" class="btn btn-success">
+              Click here if you are not redirected automatically
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  window.addEventListener("load", function () {
+    document.getElementById("esewaForm").submit();
+  });
+</script>
+{% endblock %}

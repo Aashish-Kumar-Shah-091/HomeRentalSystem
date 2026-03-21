@@ -659,6 +659,7 @@ def notifications(request):
     1. Booking requests (for property owners)
     2. Booking cancellations (for tenants)
     3. Booking acceptances (for tenants)
+    4. Payments received (for property owners)
     
     GET: Mark all unread notifications as read and display them
     """
@@ -674,12 +675,19 @@ def notifications(request):
     tenant_acceptance_qs = request.user.acceptance_notifications.select_related(
         "owner", "owner__profile", "property", "booking"
     )
+    from payments.models import Transaction
+    owner_payment_notifications_qs = Transaction.objects.filter(
+        booking__owner=request.user,
+        status=Transaction.Status.COMPLETED,
+        completed_at__isnull=False,
+    ).select_related("booking__booked_by", "booking__property").order_by("-completed_at")
 
     # Mark all unread notifications as read on GET request
     if request.method == "GET":
         owner_notifications_qs.filter(is_read=False).update(is_read=True)
         tenant_notifications_qs.filter(is_read=False).update(is_read=True)
         tenant_acceptance_qs.filter(is_read=False).update(is_read=True)
+        owner_payment_notifications_qs.filter(owner_is_read=False).update(owner_is_read=True)
 
     # ===== BUILD OWNER NOTIFICATIONS =====
     # Bookings on properties owned by user
@@ -699,6 +707,9 @@ def notifications(request):
                 "can_chat": item.chat_enabled,
                 "chat_label": "Chat Now",
                 "is_accepted": item.status == Booking.Status.ACCEPTED,
+                "can_pay": False,
+                "payment_product_name": f"Booking Payment - {item.property.title}",
+                "payment_amount": item.property.price,
                 "booking_id": item.id,
                 "property_id": item.property.id,
             }
@@ -720,6 +731,9 @@ def notifications(request):
                 "can_accept": False,
                 "can_chat": False,
                 "is_accepted": False,
+                "can_pay": False,
+                "payment_product_name": f"Booking Payment - {item.property.title}",
+                "payment_amount": item.property.price,
                 "booking_id": None,
                 "property_id": item.property.id,
             }
@@ -752,8 +766,36 @@ def notifications(request):
                 "can_chat": bool(chat_booking),
                 "chat_label": "Chat Now",
                 "is_accepted": True,
+                "can_pay": True,
+                "payment_product_name": f"Booking Payment - {item.property.title}",
+                "payment_amount": item.property.price,
                 "booking_id": booking_id,
                 "property_id": item.property.id,
+            }
+        )
+
+    # ===== BUILD OWNER PAYMENT NOTIFICATIONS =====
+    # When tenant payment for an accepted booking succeeds.
+    for item in owner_payment_notifications_qs:
+        notifications.append(
+            {
+                "kind": "payment_received",
+                "type_label": "Payment",
+                "accent": "success",
+                "icon": "fa-wallet",
+                "message": f"{item.booking.booked_by.username} paid Rs. {item.amount} for {item.booking.property.title}",
+                "created_at": item.completed_at,
+                "is_read": item.owner_is_read,
+                "can_cancel": False,
+                "can_accept": False,
+                "can_chat": item.booking.chat_enabled,
+                "chat_label": "Chat Now",
+                "is_accepted": item.booking.status == Booking.Status.ACCEPTED,
+                "can_pay": False,
+                "payment_product_name": item.product_name,
+                "payment_amount": item.amount,
+                "booking_id": item.booking_id,
+                "property_id": item.booking.property_id,
             }
         )
 
@@ -925,6 +967,13 @@ def mark_all_notifications_read(request):
             tenant=request.user,
             is_read=False,
         ).update(is_read=True)
+        # Mark all owner payment notifications as read
+        from payments.models import Transaction
+        Transaction.objects.filter(
+            booking__owner=request.user,
+            status=Transaction.Status.COMPLETED,
+            owner_is_read=False,
+        ).update(owner_is_read=True)
 
     return redirect(request.META.get('HTTP_REFERER', 'notifications'))
 

@@ -1,3 +1,21 @@
+:root {
+  --notif-title-color: #1f2d3d;
+  --notif-subtitle-color: #6c757d;
+  --notif-unread-bg: rgba(13, 110, 253, 0.05);
+  --notif-card-unread-bg: rgba(13, 110, 253, 0.03);
+  --theme-light-surface: #f8f9fa;
+  --theme-light-surface-border: rgba(31, 45, 61, 0.08);
+}
+
+[data-bs-theme="dark"] {
+  --notif-title-color: #e8eef8;
+  --notif-subtitle-color: #9fb0c5;
+  --notif-unread-bg: rgba(59, 130, 246, 0.16);
+  --notif-card-unread-bg: rgba(59, 130, 246, 0.12);
+  --theme-light-surface: rgba(18, 26, 40, 0.94);
+  --theme-light-surface-border: rgba(148, 163, 184, 0.18);
+}
+
 /* ===== Notifications (Dropdown + Page) ===== */
 
 .notif-dropdown {
@@ -17,7 +35,7 @@
 }
 
 .notif-item.notif-unread {
-  background: rgba(13, 110, 253, 0.05);
+  background: var(--notif-unread-bg);
 }
 
 .notif-icon {
@@ -42,12 +60,12 @@
 .message-dropdown-title {
   font-size: 0.95rem;
   line-height: 1.2;
-  color: #1f2d3d;
+  color: var(--notif-title-color);
 }
 
 .message-dropdown-subtitle {
   font-size: 0.82rem;
-  color: #6c757d;
+  color: var(--notif-subtitle-color);
   margin-top: 0.25rem;
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -93,7 +111,25 @@
 }
 
 .notif-card-unread {
-  background: rgba(13, 110, 253, 0.03);
+  background: var(--notif-card-unread-bg);
+}
+
+[data-bs-theme="dark"] .text-dark {
+  color: var(--bs-body-color) !important;
+}
+
+[data-bs-theme="dark"] .bg-light,
+[data-bs-theme="dark"] .bg-light-subtle,
+[data-bs-theme="dark"] .card-footer.bg-light {
+  background-color: var(--theme-light-surface) !important;
+  color: var(--bs-body-color) !important;
+  border-color: var(--theme-light-surface-border) !important;
+}
+
+[data-bs-theme="dark"] .text-bg-light {
+  background-color: rgba(39, 51, 70, 0.96) !important;
+  color: var(--bs-body-color) !important;
+  border-color: var(--theme-light-surface-border) !important;
 }
 
 /* Border-left helpers for notification cards */

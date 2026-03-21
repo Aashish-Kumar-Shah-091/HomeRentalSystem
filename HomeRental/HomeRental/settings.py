@@ -50,8 +50,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',  # Static files management
     'channels',  # Django Channels for WebSocket support
     'chat',  # Accepted-booking chat app
-    'home',  # Our home rental app
-    'bookings.apps.BookingsConfig',  # Signal-driven booking notifications
+    'home',
+    'payments',  # Our home rental app
 ]
 
 # ===== MIDDLEWARE CONFIGURATION =====
@@ -175,3 +175,29 @@ LOGIN_URL = '/accounts/login'  # URL to redirect to for login
 
 LOGIN_REDIRECT_URL = '/home/'  # URL to redirect to after successful login
 LOGOUT_REDIRECT_URL = '/home/'  # URL to redirect to after logout
+
+
+# for the email settings 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'shriram77890@gmail.com'       # Your Gmail
+EMAIL_HOST_PASSWORD = 'yaxr gdas ipss vksj'      # Use App Password
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+# for the payment methods 
+ESEWA_MERCHANT_ID = "EPAYTEST"
+ESEWA_SECRET_KEY = os.environ.get("ESEWA_SECRET_KEY", "8gBm/:&EnhH.1/q")
+ESEWA_SIGNED_FIELD_NAMES = os.environ.get(
+    "ESEWA_SIGNED_FIELD_NAMES",
+    "total_amount,transaction_uuid,product_code",
+)
+ESEWA_FORM_URL = os.environ.get(
+    "ESEWA_FORM_URL",
+    "https://rc-epay.esewa.com.np/api/epay/main/v2/form",
+)
+
+SUCCESS_URL = "http://127.0.0.1:8000/payment/success/"
+FAILURE_URL = "http://127.0.0.1:8000/payment/failure/"

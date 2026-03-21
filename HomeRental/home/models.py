@@ -9,6 +9,7 @@ import builtins
 from django.db import models
 from django.contrib.auth.models import User
 
+
 # Legacy model for home listings (may be deprecated)
 class home(models.Model):
     """

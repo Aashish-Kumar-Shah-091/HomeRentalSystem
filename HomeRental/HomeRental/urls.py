@@ -17,7 +17,6 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.contrib.auth.urls import views as auth_views
 
 # URL patterns for the entire application
 urlpatterns = [
@@ -27,6 +26,7 @@ urlpatterns = [
     # All home rental app URLs (properties, bookings, notifications, etc.)
     path('', include('home.urls')),
     path('chat/', include('chat.urls')),
+    path('payment/', include(('payments.urls', 'payments'), namespace='payments')),
     
     # Django built-in authentication URLs (login, logout, password change, etc.)
     path('accounts/', include('django.contrib.auth.urls')),

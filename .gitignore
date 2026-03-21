@@ -1,0 +1,5 @@
+# Dev/test server logs
+HomeRental/runserver-test.err.log
+HomeRental/runserver-test.out.log
+HomeRental/uvicorn-test.err.log
+HomeRental/uvicorn-test.out.log

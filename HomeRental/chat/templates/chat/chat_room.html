@@ -65,7 +65,7 @@
                 <div class="message-author">
                   {% if message.sender.id == user_id %}You{% else %}{{ message.sender.username }}{% endif %}
                 </div>
-                <div class="message-bubble">
+                <div class="message-bubble{% if message.image and not message.content %} message-bubble--image-only{% endif %}">
                   {% if message.image %}
                     <a href="{{ message.image.url }}" class="message-image-link" target="_blank" rel="noopener noreferrer">
                       <img
