@@ -19,3 +19,6 @@ class HomeConfig(AppConfig):
     # Use BigAutoField for model primary keys (supports more records)
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'home'  # App label used in database and migrations
+
+    def ready(self):
+        import home.signals  # loads signals automatically
