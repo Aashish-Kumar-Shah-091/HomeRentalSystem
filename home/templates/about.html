@@ -34,6 +34,26 @@
     border-radius: 1rem;
   }
 
+  .about-value-card {
+    background: #ffffff;
+    border: 1px solid #dfe5ef;
+    color: #142033;
+  }
+
+  .about-value-card p {
+    color: #4d5c70 !important;
+  }
+
+  [data-bs-theme="dark"] .about-value-card {
+    background: linear-gradient(135deg, #16202b 0%, #223346 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #f7fbff;
+  }
+
+  [data-bs-theme="dark"] .about-value-card p {
+    color: rgba(247, 251, 255, 0.78) !important;
+  }
+
   .hover-lift {
     transition: transform .25s ease, box-shadow .25s ease;
   }
@@ -115,7 +135,7 @@
     <section class="row g-4 mb-5">
       <!-- Mission card: Company purpose and goals -->
       <div class="col-md-6">
-        <div class="glass-card hover-lift h-100 p-4 shadow-sm">
+        <div class="glass-card about-value-card hover-lift h-100 p-4 shadow-sm">
           <h2 class="h5 fw-bold mb-3">Our Mission</h2>
           <!-- Mission statement -->
           <p class="text-muted mb-0">
@@ -125,7 +145,7 @@
       </div>
       <!-- Vision card: Company future direction -->
       <div class="col-md-6">
-        <div class="glass-card hover-lift h-100 p-4 shadow-sm">
+        <div class="glass-card about-value-card hover-lift h-100 p-4 shadow-sm">
           <h2 class="h5 fw-bold mb-3">Our Vision</h2>
           <!-- Vision statement -->
           <p class="text-muted mb-0">

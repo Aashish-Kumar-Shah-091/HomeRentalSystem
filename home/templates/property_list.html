@@ -170,11 +170,16 @@
 .form-select {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     min-width: 150px;
-    border: 2px solid #e0e0e0;
+    border: 2px solid #d6dee9;
     border-radius: 0.5rem;
-    padding: 0.4rem 0.6rem;
+    padding: 0.4rem 2.35rem 0.4rem 0.6rem;
     font-size: 0.85rem;
-    background-color: #fff;
+    background-color: #ffffff;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%231f2a37' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    color: #1f2a37;
     position: relative;
     cursor: pointer;
 }
@@ -198,17 +203,19 @@
 }
 
 .form-select:hover {
-    border-color: #17a2b8;
-    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.15);
+    border-color: #8ab4f8;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.12);
     transform: translateY(-2px);
-    background-color: #f8feff;
+    background-color: #ffffff;
 }
 
 .form-select:focus {
-    border-color: #17a2b8;
-    box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.16);
     outline: none;
     transform: translateY(-2px);
+    background-color: #ffffff;
+    color: #1f2a37;
 }
 
 .form-select:active {
@@ -221,13 +228,46 @@
 }
 
 .form-select option {
+    background-color: #ffffff;
+    color: #1f2a37;
     padding: 0.5rem;
     transition: all 0.2s ease;
 }
 
 .form-select option:checked {
-    background: linear-gradient(#17a2b8, #17a2b8);
-    background-color: #17a2b8;
+    background: linear-gradient(#dce9ff, #dce9ff);
+    background-color: #dce9ff;
+    color: #1f2a37;
+}
+
+[data-bs-theme="dark"] .form-select {
+    border-color: #2d3d4f;
+    background-color: #16202b;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    color: #f8fbff;
+}
+
+[data-bs-theme="dark"] .form-select:hover {
+    border-color: #4e6b86;
+    box-shadow: 0 4px 12px rgba(11, 21, 31, 0.28);
+    background-color: #1b2a38;
+}
+
+[data-bs-theme="dark"] .form-select:focus {
+    border-color: #8ab4f8;
+    box-shadow: 0 0 0 0.2rem rgba(138, 180, 248, 0.22);
+    background-color: #1b2a38;
+    color: #ffffff;
+}
+
+[data-bs-theme="dark"] .form-select option {
+    background-color: #16202b;
+    color: #f8fbff;
+}
+
+[data-bs-theme="dark"] .form-select option:checked {
+    background: linear-gradient(#233548, #233548);
+    background-color: #233548;
     color: white;
 }
 

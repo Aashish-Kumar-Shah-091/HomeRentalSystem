@@ -6,6 +6,20 @@
 
 {% block extra_head %}
 <style>
+  .property-form-bg,
+  .property-form-card,
+  .property-form-card .card-body,
+  .property-form-card h1,
+  .property-form-card input,
+  .property-form-card select,
+  .property-form-card textarea,
+  .form-label-custom,
+  .map-panel,
+  .map-title,
+  .map-help {
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+  }
+
   .property-form-bg {
     background-color: #f8f9fa;
   }
@@ -33,13 +47,34 @@
   }
 
   .property-form-card select {
-    background: #ffffff;
-    color: #111111;
+    background-color: #ffffff;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%231f2a37' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    border-color: #cfd8e3;
+    color: #1f2a37;
+    padding-right: 2.35rem;
   }
 
   .property-form-card select option {
     background: #ffffff;
-    color: #111111;
+    color: #1f2a37;
+  }
+
+  .property-form-card input[type="file"] {
+    background: #ffffff;
+    border: 1px solid #cfd8e3;
+    color: #1f2a37;
+  }
+
+  .property-form-card input[type="file"]::file-selector-button {
+    background: #e9eef5;
+    border: 0;
+    border-right: 1px solid #cfd8e3;
+    color: #1f2a37;
+    margin-right: 0.75rem;
+    padding: 0.5rem 0.85rem;
   }
 
   .property-form-card input:not([type="file"])::placeholder,
@@ -57,8 +92,9 @@
   }
 
   .property-form-card select:focus {
-    background: #ffffff;
-    color: #111111;
+    background-color: #ffffff;
+    border-color: #86b7fe;
+    color: #1f2a37;
   }
 
   .form-label-custom {
@@ -103,6 +139,79 @@
   #map {
     width: 100%;
     height: 100%;
+  }
+
+  [data-bs-theme="dark"] .property-form-bg {
+    background-color: rgba(12, 18, 28, 0.72);
+  }
+
+  [data-bs-theme="dark"] .property-form-card {
+    background: linear-gradient(135deg, #16202b 0%, #223346 100%);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 12px 28px rgba(8, 14, 22, 0.28) !important;
+  }
+
+  [data-bs-theme="dark"] .property-form-card .card-body {
+    color: #f7fbff;
+  }
+
+  [data-bs-theme="dark"] .property-form-card h1,
+  [data-bs-theme="dark"] .form-label-custom,
+  [data-bs-theme="dark"] .map-title {
+    color: #f7fbff;
+  }
+
+  [data-bs-theme="dark"] .property-form-card input:not([type="file"]),
+  [data-bs-theme="dark"] .property-form-card select,
+  [data-bs-theme="dark"] .property-form-card textarea,
+  [data-bs-theme="dark"] .property-form-card input[type="file"] {
+    background: rgba(9, 16, 25, 0.88);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #f7fbff;
+  }
+
+  [data-bs-theme="dark"] .property-form-card input[type="file"]::file-selector-button {
+    background: rgba(255, 255, 255, 0.08);
+    border-right: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f7fbff;
+  }
+
+  [data-bs-theme="dark"] .property-form-card select {
+    background-color: rgba(9, 16, 25, 0.88);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #f7fbff;
+  }
+
+  [data-bs-theme="dark"] .property-form-card select option {
+    background: #101824;
+    color: #f7fbff;
+  }
+
+  [data-bs-theme="dark"] .property-form-card input:not([type="file"])::placeholder,
+  [data-bs-theme="dark"] .property-form-card textarea::placeholder,
+  [data-bs-theme="dark"] .map-help,
+  [data-bs-theme="dark"] .property-form-card .form-text {
+    color: rgba(247, 251, 255, 0.7) !important;
+  }
+
+  [data-bs-theme="dark"] .property-form-card input:focus,
+  [data-bs-theme="dark"] .property-form-card select:focus,
+  [data-bs-theme="dark"] .property-form-card textarea:focus {
+    background: rgba(12, 22, 34, 0.96);
+    border-color: #8ab4f8;
+    color: #ffffff;
+    box-shadow: 0 0 0 0.2rem rgba(138, 180, 248, 0.2);
+  }
+
+  [data-bs-theme="dark"] .map-panel {
+    background: rgba(9, 16, 25, 0.58);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  [data-bs-theme="dark"] .map-circle {
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
   }
 </style>
 {% endblock %}
@@ -162,7 +271,7 @@
               <div class="col-12">
                 <label class="form-label-custom" for="{{ form.location.id_for_label }}">Location</label>
                 {{ form.location }}
-                <div class="form-text">Click on the map to auto-fill, or type a location name.</div>
+                <div class="form-text">Type the location name you want to show in filters. The map only saves coordinates.</div>
                 {% if form.location.errors %}
                 <div class="text-danger small">{{ form.location.errors|join:", " }}</div>
                 {% endif %}
@@ -177,7 +286,7 @@
               <div class="map-circle">
                 <div id="map"></div>
               </div>
-              <p class="map-help">Click anywhere on the map to set latitude/longitude and auto-fill the location name.</p>
+              <p class="map-help">Click anywhere on the map to set latitude and longitude. The saved location name comes from the field above.</p>
               <p class="map-help" id="selected-location-display"></p>
             </div>
 
@@ -223,26 +332,45 @@
         map.invalidateSize();
     }, 0);
 
-    function setLocationValue(value) {
-        if (!locationInput) {
+    function normalizeLocationValue(value) {
+        return (value || '').trim().slice(0, 200);
+    }
+
+    function updateTypedLocationMessage() {
+        if (!locationDisplay || !locationInput) {
             return;
         }
-        var normalizedValue = (value || '').trim().slice(0, 200);
-        locationInput.value = normalizedValue;
-        if (locationDisplay) {
-            locationDisplay.textContent = normalizedValue;
+        var normalizedValue = normalizeLocationValue(locationInput.value);
+        if (locationInput.value !== normalizedValue) {
+            locationInput.value = normalizedValue;
+        }
+        if (normalizedValue) {
+            locationDisplay.textContent = 'Saved location name: ' + normalizedValue;
+        } else {
+            locationDisplay.textContent = 'Pick the map point if you want, then type the location name above.';
+        }
+    }
+
+    function updateMapLocationMessage(addressText) {
+        if (!locationDisplay || !locationInput) {
+            return;
+        }
+
+        var normalizedValue = normalizeLocationValue(locationInput.value);
+        if (normalizedValue) {
+            locationDisplay.textContent = 'Map pin set near: ' + addressText + '. Saved location name: ' + normalizedValue;
+        } else {
+            locationDisplay.textContent = 'Map pin set near: ' + addressText + '. Please type the location name above.';
         }
     }
 
     function updateLocationFromMap(lat, lng) {
-        if (!locationInput) {
+        if (!locationDisplay) {
             return;
         }
 
         var requestId = ++locationRequestId;
-        if (locationDisplay) {
-            locationDisplay.textContent = 'Fetching location...';
-        }
+        locationDisplay.textContent = 'Fetching map area...';
 
         fetch(
             'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='
@@ -262,23 +390,23 @@
                 return;
             }
             if (data && data.display_name) {
-                setLocationValue(data.display_name);
-            } else if (locationDisplay && !locationInput.value.trim()) {
-                locationDisplay.textContent = 'Unable to fetch location name. Please type it above.';
+                updateMapLocationMessage(data.display_name);
+            } else {
+                updateMapLocationMessage('the selected point');
             }
         })
         .catch(function() {
-            if (locationDisplay && !locationInput.value.trim()) {
-                locationDisplay.textContent = 'Unable to fetch location name. Please type it above.';
-            }
+            updateMapLocationMessage('the selected point');
         });
     }
 
-    if (locationInput && locationInput.value.trim()) {
-        setLocationValue(locationInput.value);
+    if (locationInput) {
+        updateTypedLocationMessage();
+        locationInput.addEventListener('input', updateTypedLocationMessage);
+        locationInput.addEventListener('blur', updateTypedLocationMessage);
     }
 
-    if (latInput.value && lngInput.value && locationInput && !locationInput.value.trim()) {
+    if (latInput.value && lngInput.value) {
         updateLocationFromMap(defaultLat, defaultLng);
     }
 
@@ -295,5 +423,11 @@
         lngInput.value = lng.toFixed(6);
         updateLocationFromMap(lat, lng);
     });
+
+    if (propertyForm && locationInput) {
+        propertyForm.addEventListener('submit', function() {
+            locationInput.value = normalizeLocationValue(locationInput.value);
+        });
+    }
 </script>
 {% endblock %}

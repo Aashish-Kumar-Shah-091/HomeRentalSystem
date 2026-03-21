@@ -113,6 +113,8 @@ class PropertyForm(forms.ModelForm):
         for name, field in self.fields.items():
             field.widget.attrs["class"] = "form-control"
             # Add helpful placeholder text for contact fields
+            if name == "location":
+                field.widget.attrs["placeholder"] = "Enter location name"
             if name == "contact_name":
                 field.widget.attrs["placeholder"] = "Contact person"
             if name == "contact_phone":
