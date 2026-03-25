@@ -445,8 +445,12 @@ High → Low
   {% else %}
   <a class="btn btn-outline-secondary btn-sm custom-filter-btn"
      href="{% url 'my_properties' %}{{ filter_query }}"
-     title="Show your own properties">
+     title="{% if user.is_staff or user.is_superuser %}Manage all properties{% else %}Show your own properties{% endif %}">
+    {% if user.is_staff or user.is_superuser %}
+    <i class="fas fa-shield-halved me-1"></i>Manage All Properties
+    {% else %}
     <i class="fas fa-user me-1"></i>Show My Properties
+    {% endif %}
   </a>
   {% endif %}
 {% endif %}
@@ -547,7 +551,8 @@ View
 {% endif %}
 
 
-{% if user.is_authenticated and property.user_id == user.id %}
+{% if user.is_authenticated %}
+{% if property.user_id == user.id or user.is_staff or user.is_superuser %}
 
 <a class="btn btn-outline-primary btn-sm"
 href="{% url 'property_edit' property.id %}"
@@ -568,6 +573,7 @@ Delete
 
 </a>
 
+{% endif %}
 {% endif %}
 
 </div>
