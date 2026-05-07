@@ -52,7 +52,7 @@ class Property(models.Model):
     property_type = models.CharField(max_length=10, choices=PROPERTY_TYPE)  # Rent or Sell
     
     # Media and location coordinates
-    image = models.ImageField(upload_to='property_images/')  # Property main image
+    image = models.ImageField(upload_to='properties/')  # Property main image
     created_at = models.DateTimeField(auto_now_add=True)  # Creation timestamp
     latitude = models.FloatField(null=True, blank=True)  # GPS latitude for map display
     longitude = models.FloatField(null=True, blank=True)  # GPS longitude for map display
@@ -228,3 +228,5 @@ class Testimonial(models.Model):
 
     def __str__(self):
         return f"{self.user.username} ({self.get_role_display()})"
+
+
